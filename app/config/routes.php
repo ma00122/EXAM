@@ -5,6 +5,7 @@ use app\controllers\AuthController;
 use app\controllers\EchangeController;
 use app\controllers\ObjetController;
 use app\controllers\BesoinController;
+use app\controllers\VilleController;
 use flight\Engine;
 use flight\net\Router;
 
