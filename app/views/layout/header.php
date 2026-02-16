@@ -35,6 +35,22 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/"><i class="bi bi-house"></i> Accueil</a>
                     </li>
+                    
+                    <!-- Menu BNGRC -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-building"></i> BNGRC
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/villes"><i class="bi bi-geo-alt"></i> Villes</a></li>
+                            <li><a class="dropdown-item" href="/besoins"><i class="bi bi-list-check"></i> Besoins</a></li>
+                            <li><a class="dropdown-item" href="/dons"><i class="bi bi-gift"></i> Dons</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
+                            <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        </ul>
+                    </li>
+                    
                     <li class="nav-item">
                         <a class="nav-link" href="/objets"><i class="bi bi-grid"></i> Objets</a>
                     </li>

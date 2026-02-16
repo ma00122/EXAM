@@ -27,14 +27,18 @@ class Ville
      */
     public function insertVille(string $nom, string $region): int|false
     {
-        $sql = "INSERT INTO ville (nom, region) VALUES (?, ?)";
-        $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([$nom, $region]);
-        
-        if ($result) {
-            return (int) $this->db->lastInsertId();
+        try {
+            $sql = "INSERT INTO ville (nom, region) VALUES (?, ?)";
+            $stmt = $this->db->prepare($sql);
+            $result = $stmt->execute([$nom, $region]);
+
+            if ($result) {
+                return (int) $this->db->lastInsertId();
+            }
+            return false;
+        } catch (\PDOException $e) {
+            return false;
         }
-        return false;
     }
 
     /* ===================== READ ===================== */
@@ -45,9 +49,13 @@ class Ville
      */
     public function getAllVilles(): array
     {
-        $sql = "SELECT * FROM ville ORDER BY nom ASC";
-        $stmt = $this->db->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT * FROM ville ORDER BY nom ASC";
+            $stmt = $this->db->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return [];
+        }
     }
 
     /**
@@ -57,10 +65,14 @@ class Ville
      */
     public function getVilleById(int $id): array|false
     {
-        $sql = "SELECT * FROM ville WHERE id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT * FROM ville WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 
     /**
@@ -70,11 +82,15 @@ class Ville
      */
     public function searchVilles(string $search): array
     {
-        $sql = "SELECT * FROM ville WHERE nom LIKE ? OR region LIKE ? ORDER BY nom ASC";
-        $stmt = $this->db->prepare($sql);
-        $search = "%{$search}%";
-        $stmt->execute([$search, $search]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT * FROM ville WHERE nom LIKE ? OR region LIKE ? ORDER BY nom ASC";
+            $stmt = $this->db->prepare($sql);
+            $search = "%{$search}%";
+            $stmt->execute([$search, $search]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return [];
+        }
     }
 
     /**
@@ -84,10 +100,14 @@ class Ville
      */
     public function getVillesByRegion(string $region): array
     {
-        $sql = "SELECT * FROM ville WHERE region = ? ORDER BY nom ASC";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$region]);
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        try {
+            $sql = "SELECT * FROM ville WHERE region = ? ORDER BY nom ASC";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$region]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (\PDOException $e) {
+            return [];
+        }
     }
 
     /**
@@ -96,9 +116,13 @@ class Ville
      */
     public function getAllRegions(): array
     {
-        $sql = "SELECT DISTINCT region FROM ville ORDER BY region ASC";
-        $stmt = $this->db->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        try {
+            $sql = "SELECT DISTINCT region FROM ville ORDER BY region ASC";
+            $stmt = $this->db->query($sql);
+            return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        } catch (\PDOException $e) {
+            return [];
+        }
     }
 
     /* ===================== UPDATE ===================== */
@@ -112,9 +136,13 @@ class Ville
      */
     public function updateVille(int $id, string $nom, string $region): bool
     {
-        $sql = "UPDATE ville SET nom = ?, region = ? WHERE id = ?";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$nom, $region, $id]);
+        try {
+            $sql = "UPDATE ville SET nom = ?, region = ? WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$nom, $region, $id]);
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 
     /* ===================== DELETE ===================== */
@@ -126,9 +154,13 @@ class Ville
      */
     public function deleteVille(int $id): bool
     {
-        $sql = "DELETE FROM ville WHERE id = ?";
-        $stmt = $this->db->prepare($sql);
-        return $stmt->execute([$id]);
+        try {
+            $sql = "DELETE FROM ville WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            return $stmt->execute([$id]);
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 
     /**
@@ -138,10 +170,14 @@ class Ville
      */
     public function villeExists(int $id): bool
     {
-        $sql = "SELECT COUNT(*) FROM ville WHERE id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetchColumn() > 0;
+        try {
+            $sql = "SELECT COUNT(*) FROM ville WHERE id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetchColumn() > 0;
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 
     /**
@@ -151,10 +187,14 @@ class Ville
      */
     public function hasBesoins(int $id): bool
     {
-        $sql = "SELECT COUNT(*) FROM besoin WHERE ville_id = ?";
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute([$id]);
-        return $stmt->fetchColumn() > 0;
+        try {
+            $sql = "SELECT COUNT(*) FROM besoin WHERE ville_id = ?";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([$id]);
+            return $stmt->fetchColumn() > 0;
+        } catch (\PDOException $e) {
+            return false;
+        }
     }
 
     /**
@@ -163,8 +203,12 @@ class Ville
      */
     public function countVilles(): int
     {
-        $sql = "SELECT COUNT(*) FROM ville";
-        $stmt = $this->db->query($sql);
-        return (int) $stmt->fetchColumn();
+        try {
+            $sql = "SELECT COUNT(*) FROM ville";
+            $stmt = $this->db->query($sql);
+            return (int) $stmt->fetchColumn();
+        } catch (\PDOException $e) {
+            return 0;
+        }
     }
 }
