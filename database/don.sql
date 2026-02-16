@@ -19,3 +19,15 @@ CREATE TABLE attribution (
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
+
+INSERT INTO don (type_produit, quantite, date_saisie)
+VALUES ('Riz', 100, '2026-02-10');
+
+INSERT INTO don (type_produit, quantite, date_saisie)
+VALUES ('Huile', 50, '2026-02-11');
+
+INSERT INTO don (type_produit, quantite, date_saisie)
+VALUES ('Savon', 200, '2026-02-12');
+
+INSERT INTO don (type_produit, quantite, date_saisie)
+VALUES ('Sucre', 75, '2026-02-13');
