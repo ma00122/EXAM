@@ -1,5 +1,6 @@
 <?php
 // lib_validation.php
+//lib
 
 function post_trim($key) {
     return isset($_POST[$key]) ? trim($_POST[$key]) : '';
