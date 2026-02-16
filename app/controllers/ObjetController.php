@@ -27,6 +27,7 @@ class ObjetController
         ]);
     }
 
+    public function liste(): void
     {
         // Provide minimal data to the view
         $objets = [];
