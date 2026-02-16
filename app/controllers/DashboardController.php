@@ -3,7 +3,6 @@ namespace app\controllers;
 
 use flight\Engine;
 use app\models\Ville;
-use app\models\Besoin;
 use app\models\Don;
 use app\models\Attribution;
 use Flight;
@@ -14,18 +13,14 @@ use Flight;
  * 
  * Affiche :
  * - Liste des villes
- * - Liste des besoins
- * - Quantité demandée
- * - Quantité reçue (SUM attribution)
- * - Quantité restante
- * - Valeur totale
- * - Pourcentage couverture
+ * - Liste des dons
+ * - Quantité donnée
+ * - Statistiques globales
  */
 class DashboardController
 {
     protected Engine $app;
     protected Ville $villeModel;
-    protected Besoin $besoinModel;
     protected Don $donModel;
     protected Attribution $attributionModel;
 
@@ -33,7 +28,6 @@ class DashboardController
     {
         $this->app = $app;
         $this->villeModel = new Ville(Flight::db());
-        $this->besoinModel = new Besoin(Flight::db());
         $this->donModel = new Don(Flight::db());
         $this->attributionModel = new Attribution(Flight::db());
     }
@@ -48,7 +42,6 @@ class DashboardController
     {
         // Récupérer toutes les données
         $villes = $this->villeModel->getAllVilles();
-        $besoins = $this->besoinModel->getAllBesoins();
         $dons = $this->donModel->getAllDons();
 
         // Calculer les statistiques globales
@@ -57,17 +50,16 @@ class DashboardController
         // Calculer les statistiques par ville
         $statsParVille = $this->calculateStatsByVille();
 
-        // Calculer les statistiques par produit
+        // Calculer les statistiques par produit (dons)
         $statsParProduit = $this->calculateStatsByProduit();
 
-        // Enrichir les besoins avec les infos d'attribution
-        $besoinsEnrichis = $this->enrichBesoins($besoins);
+        // Enrichir les dons avec les infos d'attribution
+        $donsEnrichis = $this->enrichDons($dons);
 
         $this->app->render('dashboard/index', [
-            'pageTitle' => 'Dashboard BNGRC - Suivi des Besoins et Dons',
+            'pageTitle' => 'Dashboard BNGRC - Suivi des Dons',
             'villes' => $villes,
-            'besoins' => $besoinsEnrichis,
-            'dons' => $dons,
+            'dons' => $donsEnrichis,
             'statsGlobales' => $statsGlobales,
             'statsParVille' => $statsParVille,
             'statsParProduit' => $statsParProduit
@@ -82,36 +74,11 @@ class DashboardController
      */
     private function calculateGlobalStats(): array
     {
-        $besoins = $this->besoinModel->getAllBesoins();
         $dons = $this->donModel->getAllDons();
 
-        $totalQuantiteDemandee = 0;
-        $totalValeurDemandee = 0;
-        $totalQuantiteRecue = 0;
-
-        foreach ($besoins as $besoin) {
-            $totalQuantiteDemandee += $besoin['quantite'];
-            $totalValeurDemandee += ($besoin['quantite'] * $besoin['prix_unitaire']);
-            $totalQuantiteRecue += $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-        }
-
-        $totalQuantiteRestante = $totalQuantiteDemandee - $totalQuantiteRecue;
-        $pourcentageCouverture = $totalQuantiteDemandee > 0 
-            ? round(($totalQuantiteRecue / $totalQuantiteDemandee) * 100, 2) 
-            : 0;
-
-        // Calculer la valeur reçue (estimation basée sur les prix unitaires des besoins)
-        $valeurRecue = 0;
-        foreach ($besoins as $besoin) {
-            $quantiteRecue = $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-            $valeurRecue += ($quantiteRecue * $besoin['prix_unitaire']);
-        }
-
-        $valeurRestante = $totalValeurDemandee - $valeurRecue;
-
-        // Statistiques des dons
         $totalDons = 0;
         $totalDonsAttribues = 0;
+
         foreach ($dons as $don) {
             $totalDons += $don['quantite'];
             $totalDonsAttribues += $this->attributionModel->getTotalAttribueByDon($don['id']);
@@ -119,19 +86,14 @@ class DashboardController
 
         return [
             'nombre_villes' => count($this->villeModel->getAllVilles()),
-            'nombre_besoins' => count($besoins),
             'nombre_dons' => count($dons),
             'nombre_attributions' => $this->attributionModel->countAttributions(),
-            'quantite_demandee' => $totalQuantiteDemandee,
-            'quantite_recue' => $totalQuantiteRecue,
-            'quantite_restante' => $totalQuantiteRestante,
-            'valeur_totale' => $totalValeurDemandee,
-            'valeur_recue' => $valeurRecue,
-            'valeur_restante' => $valeurRestante,
-            'pourcentage_couverture' => $pourcentageCouverture,
             'total_dons' => $totalDons,
             'dons_attribues' => $totalDonsAttribues,
-            'dons_restants' => $totalDons - $totalDonsAttribues
+            'dons_restants' => $totalDons - $totalDonsAttribues,
+            'pourcentage_attribue' => $totalDons > 0 
+                ? round(($totalDonsAttribues / $totalDons) * 100, 2) 
+                : 0
         ];
     }
 
@@ -147,49 +109,13 @@ class DashboardController
         $stats = [];
 
         foreach ($villes as $ville) {
-            $besoins = $this->besoinModel->getBesoinsByVille($ville['id']);
-            
-            $quantiteDemandee = 0;
-            $quantiteRecue = 0;
-            $valeurTotale = 0;
-
-            foreach ($besoins as $besoin) {
-                $quantiteDemandee += $besoin['quantite'];
-                $valeurTotale += ($besoin['quantite'] * $besoin['prix_unitaire']);
-                $quantiteRecue += $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-            }
-
-            $quantiteRestante = $quantiteDemandee - $quantiteRecue;
-            $pourcentage = $quantiteDemandee > 0 
-                ? round(($quantiteRecue / $quantiteDemandee) * 100, 2) 
-                : 0;
-
-            // Calculer la valeur reçue
-            $valeurRecue = 0;
-            foreach ($besoins as $besoin) {
-                $recue = $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-                $valeurRecue += ($recue * $besoin['prix_unitaire']);
-            }
-
             $stats[] = [
                 'ville_id' => $ville['id'],
                 'ville_nom' => $ville['nom'],
                 'ville_region' => $ville['region'],
-                'nombre_besoins' => count($besoins),
-                'quantite_demandee' => $quantiteDemandee,
-                'quantite_recue' => $quantiteRecue,
-                'quantite_restante' => $quantiteRestante,
-                'valeur_totale' => $valeurTotale,
-                'valeur_recue' => $valeurRecue,
-                'valeur_restante' => $valeurTotale - $valeurRecue,
-                'pourcentage_couverture' => $pourcentage
+                'population' => $ville['population'] ?? 0
             ];
         }
-
-        // Trier par pourcentage croissant (les plus dans le besoin en premier)
-        usort($stats, function($a, $b) {
-            return $a['pourcentage_couverture'] <=> $b['pourcentage_couverture'];
-        });
 
         return $stats;
     }
@@ -197,67 +123,59 @@ class DashboardController
     /* ===================== STATISTIQUES PAR PRODUIT ===================== */
 
     /**
-     * Calculer les statistiques par produit
+     * Calculer les statistiques par produit (basé sur les dons)
      * @return array Statistiques par produit
      */
     private function calculateStatsByProduit(): array
     {
-        $produits = $this->besoinModel->getAllProduits();
+        $produits = $this->donModel->getAllTypesProduits();
         $stats = [];
 
         foreach ($produits as $produit) {
-            $besoins = $this->besoinModel->getBesoinsByProduit($produit);
+            $dons = $this->donModel->getDonsByTypeProduit($produit);
             
-            $quantiteDemandee = 0;
-            $quantiteRecue = 0;
-            $valeurTotale = 0;
+            $quantiteTotale = 0;
+            $quantiteAttribuee = 0;
 
-            foreach ($besoins as $besoin) {
-                $quantiteDemandee += $besoin['quantite'];
-                $valeurTotale += ($besoin['quantite'] * $besoin['prix_unitaire']);
-                $quantiteRecue += $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
+            foreach ($dons as $don) {
+                $quantiteTotale += $don['quantite'];
+                $quantiteAttribuee += $this->attributionModel->getTotalAttribueByDon($don['id']);
             }
-
-            $quantiteRestante = $quantiteDemandee - $quantiteRecue;
-            $pourcentage = $quantiteDemandee > 0 
-                ? round(($quantiteRecue / $quantiteDemandee) * 100, 2) 
-                : 0;
 
             $stats[] = [
                 'produit' => $produit,
-                'nombre_besoins' => count($besoins),
-                'quantite_demandee' => $quantiteDemandee,
-                'quantite_recue' => $quantiteRecue,
-                'quantite_restante' => $quantiteRestante,
-                'valeur_totale' => $valeurTotale,
-                'pourcentage_couverture' => $pourcentage
+                'nombre_dons' => count($dons),
+                'quantite_totale' => $quantiteTotale,
+                'quantite_attribuee' => $quantiteAttribuee,
+                'quantite_restante' => $quantiteTotale - $quantiteAttribuee,
+                'pourcentage_attribue' => $quantiteTotale > 0 
+                    ? round(($quantiteAttribuee / $quantiteTotale) * 100, 2) 
+                    : 0
             ];
         }
 
         return $stats;
     }
 
-    /* ===================== ENRICHISSEMENT BESOINS ===================== */
+    /* ===================== ENRICHISSEMENT DONS ===================== */
 
     /**
-     * Enrichir les besoins avec les informations d'attribution
-     * @param array $besoins Liste des besoins
-     * @return array Besoins enrichis
+     * Enrichir les dons avec les informations d'attribution
+     * @param array $dons Liste des dons
+     * @return array Dons enrichis
      */
-    private function enrichBesoins(array $besoins): array
+    private function enrichDons(array $dons): array
     {
-        foreach ($besoins as &$besoin) {
-            $quantiteRecue = $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-            $besoin['quantite_recue'] = $quantiteRecue;
-            $besoin['quantite_restante'] = $besoin['quantite'] - $quantiteRecue;
-            $besoin['valeur_recue'] = $quantiteRecue * $besoin['prix_unitaire'];
-            $besoin['valeur_restante'] = $besoin['quantite_restante'] * $besoin['prix_unitaire'];
-            $besoin['pourcentage_couverture'] = $besoin['quantite'] > 0 
-                ? round(($quantiteRecue / $besoin['quantite']) * 100, 2) 
+        foreach ($dons as &$don) {
+            $quantiteAttribuee = $this->attributionModel->getTotalAttribueByDon($don['id']);
+            $don['quantite_attribuee'] = $quantiteAttribuee;
+            $don['quantite_restante'] = $don['quantite'] - $quantiteAttribuee;
+            $don['pourcentage_attribue'] = $don['quantite'] > 0 
+                ? round(($quantiteAttribuee / $don['quantite']) * 100, 2) 
                 : 0;
         }
 
-        return $besoins;
+        return $dons;
     }
 
     /* ===================== DÉTAIL PAR VILLE ===================== */
@@ -276,57 +194,10 @@ class DashboardController
             return;
         }
 
-        $besoins = $this->besoinModel->getBesoinsByVille($id);
-        $besoinsEnrichis = $this->enrichBesoins($besoins);
-
-        // Calculer les stats de la ville
-        $stats = $this->calculateVilleStats($id);
-
         $this->app->render('dashboard/ville_detail', [
             'pageTitle' => "Dashboard - {$ville['nom']}",
-            'ville' => $ville,
-            'besoins' => $besoinsEnrichis,
-            'stats' => $stats
+            'ville' => $ville
         ]);
-    }
-
-    /**
-     * Calculer les statistiques d'une ville
-     * @param int $villeId ID de la ville
-     * @return array Statistiques
-     */
-    private function calculateVilleStats(int $villeId): array
-    {
-        $besoins = $this->besoinModel->getBesoinsByVille($villeId);
-        
-        $quantiteDemandee = 0;
-        $quantiteRecue = 0;
-        $valeurTotale = 0;
-
-        foreach ($besoins as $besoin) {
-            $quantiteDemandee += $besoin['quantite'];
-            $valeurTotale += ($besoin['quantite'] * $besoin['prix_unitaire']);
-            $quantiteRecue += $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-        }
-
-        $valeurRecue = 0;
-        foreach ($besoins as $besoin) {
-            $recue = $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
-            $valeurRecue += ($recue * $besoin['prix_unitaire']);
-        }
-
-        return [
-            'nombre_besoins' => count($besoins),
-            'quantite_demandee' => $quantiteDemandee,
-            'quantite_recue' => $quantiteRecue,
-            'quantite_restante' => $quantiteDemandee - $quantiteRecue,
-            'valeur_totale' => $valeurTotale,
-            'valeur_recue' => $valeurRecue,
-            'valeur_restante' => $valeurTotale - $valeurRecue,
-            'pourcentage_couverture' => $quantiteDemandee > 0 
-                ? round(($quantiteRecue / $quantiteDemandee) * 100, 2) 
-                : 0
-        ];
     }
 
     /* ===================== API JSON ===================== */
@@ -348,7 +219,7 @@ class DashboardController
     }
 
     /**
-     * API - Statistiques d'une ville en JSON
+     * API - Détail d'une ville en JSON
      * GET /api/bngrc/dashboard/ville/@id
      */
     public function apiVilleDetail(int $id): void
@@ -363,16 +234,10 @@ class DashboardController
             return;
         }
 
-        $besoins = $this->besoinModel->getBesoinsByVille($id);
-        $besoinsEnrichis = $this->enrichBesoins($besoins);
-        $stats = $this->calculateVilleStats($id);
-
         $this->app->json([
             'success' => true,
             'data' => [
-                'ville' => $ville,
-                'besoins' => $besoinsEnrichis,
-                'stats' => $stats
+                'ville' => $ville
             ]
         ]);
     }
