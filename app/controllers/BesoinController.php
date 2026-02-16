@@ -175,6 +175,107 @@ class BesoinController
     }
 
     /**
+     * GET /besoins/restants - Page des besoins restants (non satisfaits)
+     * Bolton - Module Calculs Financiers
+     */
+    public function restants(): void
+    {
+        // Récupérer la liste des villes pour le filtre
+        $villes = Besoin::getAllVilles();
+
+        // Récupérer l'ID de ville passé en paramètre GET (filtre)
+        $selectedVille = (int) (Flight::request()->query->ville_id ?? 0);
+
+        // Récupérer les besoins restants selon filtre ou tous
+        if ($selectedVille > 0) {
+            $besoinsRestants = Besoin::getBesoinsRestantsParVille($selectedVille);
+        } else {
+            $besoinsRestants = Besoin::getBesoinsRestants();
+        }
+
+        // Récupérer les statistiques globales
+        $stats = Besoin::getStatistiquesGlobales();
+
+        // Récupérer le pourcentage de frais d'achat
+        $fraisPourcentage = Besoin::getFraisAchatPourcentage();
+
+        // Message flash
+        $success = $_SESSION['flash_success'] ?? null;
+        $error = $_SESSION['flash_error'] ?? null;
+        unset($_SESSION['flash_success'], $_SESSION['flash_error']);
+
+        Flight::render('besoins/restants', [
+            'pageTitle' => 'Besoins Restants',
+            'besoins_restants' => $besoinsRestants,
+            'villes' => $villes,
+            'selected_ville' => $selectedVille,
+            'stats' => $stats,
+            'frais_pourcentage' => $fraisPourcentage,
+            'success' => $success,
+            'error' => $error
+        ]);
+    }
+
+    /**
+     * GET /recap/data - API JSON pour Ajax
+     * Retourne les montants totaux pour actualisation dynamique
+     * Bolton - Module Calculs Financiers
+     */
+    public function recapData(): void
+    {
+        $stats = Besoin::getStatistiquesGlobales();
+        
+        Flight::json([
+            'total' => (float) ($stats['montant_total_global'] ?? 0),
+            'satisfait' => (float) ($stats['montant_satisfait_global'] ?? 0),
+            'restant' => (float) ($stats['montant_restant_global'] ?? 0),
+            'quantite_demandee' => (int) ($stats['quantite_totale_demandee'] ?? 0),
+            'quantite_recue' => (int) ($stats['quantite_totale_recue'] ?? 0),
+            'quantite_restante' => (int) ($stats['quantite_totale_restante'] ?? 0),
+            'nombre_besoins' => (int) ($stats['nombre_besoins'] ?? 0)
+        ]);
+    }
+
+    /**
+     * GET /recap/data/ville/@id - API JSON pour Ajax par ville
+     * Bolton - Module Calculs Financiers
+     */
+    public function recapDataVille(int $villeId): void
+    {
+        $stats = Besoin::getStatistiquesParVille($villeId);
+        
+        Flight::json([
+            'total' => (float) ($stats['montant_total'] ?? 0),
+            'satisfait' => (float) ($stats['montant_satisfait'] ?? 0),
+            'restant' => (float) ($stats['montant_restant'] ?? 0),
+            'quantite_demandee' => (int) ($stats['quantite_demandee'] ?? 0),
+            'quantite_recue' => (int) ($stats['quantite_recue'] ?? 0),
+            'quantite_restante' => (int) ($stats['quantite_restante'] ?? 0),
+            'nombre_besoins' => (int) ($stats['nombre_besoins'] ?? 0)
+        ]);
+    }
+
+    /**
+     * GET /besoins/calculer-achat/@id - Calculer l'achat possible pour un besoin
+     * Bolton - Module Calculs Financiers avec Frais
+     */
+    public function calculerAchat(int $besoinId): void
+    {
+        $argentDisponible = (float) (Flight::request()->query->montant ?? 0);
+        
+        if ($argentDisponible <= 0) {
+            Flight::json([
+                'success' => false,
+                'message' => 'Veuillez spécifier un montant d\'argent disponible (paramètre montant)'
+            ], 400);
+            return;
+        }
+        
+        $resultat = Besoin::calculerAchatPossible($besoinId, $argentDisponible);
+        Flight::json($resultat);
+    }
+
+    /**
      * Validation des données du besoin
      */
     private function validateBesoinData(array $data): array

@@ -91,6 +91,30 @@ $router->get('/besoins/delete/@id', function($id) use ($app) {
     $controller->delete((int) $id);
 });
 
+/* ===================== ROUTES BESOINS RESTANTS (BOLTON) ===================== */
+
+$router->get('/besoins/restants', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->restants();
+});
+
+/* ===================== ROUTES RECAP DATA API (BOLTON) ===================== */
+
+$router->get('/recap/data', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->recapData();
+});
+
+$router->get('/recap/data/ville/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->recapDataVille((int) $id);
+});
+
+$router->get('/besoins/calculer-achat/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->calculerAchat((int) $id);
+});
+
 /* ===================== ROUTES DONS (MAHERY) ===================== */
 
 $router->get('/dons', function() use ($app) {
