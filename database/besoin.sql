@@ -26,17 +26,7 @@ CREATE TABLE IF NOT EXISTS besoin (
 
 -- Données de test
 INSERT INTO besoin (type_id, produit, quantite, prix_unitaire) VALUES
-(1, 'Riz', 100
-
-
- 
- 
- 
- 
- 
- 
- 
- 77_7, 2500),
+(1, 'Riz', 100, 77.7),
 (2, 'Tôle', 50, 10000),
 (1, 'Huile', 200, 4500),
 (3, 'Donation', 100000, 1),
