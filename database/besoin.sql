@@ -1,4 +1,4 @@
--- Table type_besoin
+file-- Table type_besoin
 CREATE TABLE IF NOT EXISTS type_besoin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom_type VARCHAR(50) NOT NULL UNIQUE,
