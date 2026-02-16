@@ -22,8 +22,18 @@ class BesoinController
      */
     public function index(): void
     {
-        // Récupérer tous les besoins avec détails
-        $besoins = Besoin::getAllBesoinsWithDetails();
+        // Récupérer la liste des villes pour le filtre
+        $villes = Besoin::getAllVilles();
+
+        // Récupérer l'ID de ville passé en paramètre GET (filtre)
+        $selectedVille = (int) (Flight::request()->query->ville_id ?? 0);
+
+        // Récupérer les besoins selon filtre ou tous
+        if ($selectedVille > 0) {
+            $besoins = Besoin::getBesoinsByVille($selectedVille);
+        } else {
+            $besoins = Besoin::getAllBesoinsWithDetails();
+        }
 
         // Message flash
         $success = $_SESSION['flash_success'] ?? null;
@@ -33,6 +43,8 @@ class BesoinController
         Flight::render('besoins/index', [
             'pageTitle' => 'Liste des Besoins',
             'besoins' => $besoins,
+            'villes' => $villes,
+            'selected_ville' => $selectedVille,
             'success' => $success,
             'error' => $error
         ]);

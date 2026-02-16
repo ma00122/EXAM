@@ -173,4 +173,23 @@ class Besoin extends ActiveRecord
         $stmt = $db->query($sql);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Récupérer les besoins pour une ville donnée
+     */
+    public static function getBesoinsByVille(int $ville_id): array
+    {
+        $db = \Flight::db();
+        $sql = "
+            SELECT b.*, t.nom_type as type_nom, v.nom as ville_nom
+            FROM besoin b
+            LEFT JOIN type_besoin t ON b.type_id = t.id
+            LEFT JOIN ville v ON b.ville_id = v.id
+            WHERE b.ville_id = :ville_id
+            ORDER BY b.id DESC
+        ";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([':ville_id' => $ville_id]);
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

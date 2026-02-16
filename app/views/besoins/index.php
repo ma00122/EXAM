@@ -11,6 +11,21 @@
         </a>
     </div>
 
+    <!-- Filtre par ville -->
+    <div class="mb-3">
+        <form method="get" class="d-flex gap-2 align-items-center">
+            <label for="ville_id" class="mb-0">Filtrer par ville :</label>
+            <select name="ville_id" id="ville_id" class="form-select" style="width: 240px;">
+                <option value="0">Toutes les villes</option>
+                <?php if (!empty($villes)): foreach ($villes as $ville): ?>
+                    <option value="<?= $ville['id'] ?>" <?= (!empty($selected_ville) && (int)$selected_ville === (int)$ville['id']) ? 'selected' : '' ?>><?= htmlspecialchars($ville['nom']) ?></option>
+                <?php endforeach; endif; ?>
+            </select>
+            <button class="btn btn-primary" type="submit">Filtrer</button>
+            <a href="/besoins" class="btn btn-outline-secondary">Réinitialiser</a>
+        </form>
+    </div>
+
     <!-- Messages flash -->
     <?php if (!empty($success)): ?>
     <div class="alert alert-success alert-dismissible fade show" role="alert">
