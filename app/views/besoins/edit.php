@@ -6,50 +6,20 @@
             <div class="card shadow">
                 <div class="card-header bg-primary text-white">
                     <h4 class="mb-0">
-                        <i class="bi bi-pencil"></i> Modifier le besoin #<?= $besoin->id ?>
+                        <i class="bi bi-pencil"></i> Modifier le besoin #<?= $besoin['id'] ?>
                     </h4>
                 </div>
                 <div class="card-body">
-                    <form action="/besoins/update/<?= $besoin->id ?>" method="POST" id="besoinEditForm">
+                    <form action="/besoins/update/<?= $besoin['id'] ?>" method="POST" id="besoinEditForm">
                         
-                        <div class="row">
-                            <!-- Ville (non modifiable) -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-geo-alt"></i> Ville
-                                </label>
-                                <?php 
-                                $villeNom = 'N/A';
-                                foreach ($villes as $ville) {
-                                    if ($ville->id == $besoin->ville_id) {
-                                        $villeNom = $ville->nom;
-                                        break;
-                                    }
-                                }
-                                ?>
-                                <input type="text" class="form-control" 
-                                       value="<?= htmlspecialchars($villeNom ?? '') ?>" disabled readonly>
-                                <small class="text-muted">Non modifiable</small>
-                            </div>
-
-                            <!-- Type de besoin (non modifiable) -->
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">
-                                    <i class="bi bi-tag"></i> Type
-                                </label>
-                                <?php 
-                                $typeNom = 'N/A';
-                                foreach ($types as $type) {
-                                    if ($type->id == $besoin->type_id) {
-                                        $typeNom = $type->nom_type;
-                                        break;
-                                    }
-                                }
-                                ?>
-                                <input type="text" class="form-control" 
-                                       value="<?= htmlspecialchars($typeNom ?? '') ?>" disabled readonly>
-                                <small class="text-muted">Non modifiable</small>
-                            </div>
+                        <!-- Type de besoin (non modifiable) -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="bi bi-tag"></i> Type
+                            </label>
+                            <input type="text" class="form-control" 
+                                   value="<?= htmlspecialchars($besoin['type_nom'] ?? 'N/A') ?>" disabled readonly>
+                            <small class="text-muted">Non modifiable</small>
                         </div>
 
                         <!-- Produit (non modifiable) -->
@@ -58,7 +28,7 @@
                                 <i class="bi bi-box"></i> Produit
                             </label>
                             <input type="text" class="form-control" 
-                                   value="<?= htmlspecialchars($besoin->produit ?? '') ?>" disabled readonly>
+                                   value="<?= htmlspecialchars($besoin['produit'] ?? '') ?>" disabled readonly>
                             <small class="text-muted">Non modifiable</small>
                         </div>
 
@@ -69,7 +39,7 @@
                                     <i class="bi bi-123"></i> Quantité <span class="text-danger">*</span>
                                 </label>
                                 <input type="number" class="form-control" id="quantite" name="quantite" 
-                                       min="1" required value="<?= $besoin->quantite ?>">
+                                       min="1" required value="<?= $besoin['quantite'] ?>">
                                 <div class="invalid-feedback">La quantité doit être supérieure à 0.</div>
                             </div>
 
@@ -79,7 +49,7 @@
                                     <i class="bi bi-currency-exchange"></i> Prix Unitaire (Ar)
                                 </label>
                                 <input type="text" class="form-control" 
-                                       value="<?= number_format($besoin->prix_unitaire, 2, ',', ' ') ?> Ar" 
+                                       value="<?= number_format($besoin['prix_unitaire'], 2, ',', ' ') ?> Ar" 
                                        disabled readonly>
                                 <small class="text-warning">
                                     <i class="bi bi-lock"></i> Le prix unitaire n'est pas modifiable après insertion.
@@ -95,27 +65,9 @@
                                         <i class="bi bi-calculator"></i> Valeur Totale
                                     </h5>
                                     <p class="card-text display-6 text-success" id="valeur_totale">
-                                        <?= number_format($besoin->quantite * $besoin->prix_unitaire, 2, ',', ' ') ?> Ar
+                                        <?= number_format($besoin['quantite'] * $besoin['prix_unitaire'], 2, ',', ' ') ?> Ar
                                     </p>
                                     <small class="text-muted">valeur_totale = quantité × prix_unitaire</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Informations de date -->
-                        <div class="mb-4">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar-plus"></i> 
-                                        Créé le : <?= date('d/m/Y H:i', strtotime($besoin->created_at)) ?>
-                                    </small>
-                                </div>
-                                <div class="col-md-6 text-md-end">
-                                    <small class="text-muted">
-                                        <i class="bi bi-calendar-check"></i> 
-                                        Modifié le : <?= date('d/m/Y H:i', strtotime($besoin->updated_at)) ?>
-                                    </small>
                                 </div>
                             </div>
                         </div>
@@ -126,7 +78,7 @@
                                 <i class="bi bi-arrow-left"></i> Retour
                             </a>
                             <div>
-                                <a href="/besoins/delete/<?= $besoin->id ?>" 
+                                <a href="/besoins/delete/<?= $besoin['id'] ?>" 
                                    class="btn btn-danger me-2"
                                    onclick="return confirm('Êtes-vous sûr de vouloir supprimer ce besoin ?');">
                                     <i class="bi bi-trash"></i> Supprimer
@@ -144,11 +96,10 @@
 </div>
 
 <script>
-// Calcul automatique de la valeur totale
 document.addEventListener('DOMContentLoaded', function() {
     const quantiteInput = document.getElementById('quantite');
     const valeurTotaleDisplay = document.getElementById('valeur_totale');
-    const prixUnitaire = <?= $besoin->prix_unitaire ?>;
+    const prixUnitaire = <?= $besoin['prix_unitaire'] ?>;
 
     function updateValeurTotale() {
         const quantite = parseFloat(quantiteInput.value) || 0;
@@ -162,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     quantiteInput.addEventListener('input', updateValeurTotale);
 
-    // Validation du formulaire
     const form = document.getElementById('besoinEditForm');
     form.addEventListener('submit', function(event) {
         if (!form.checkValidity()) {

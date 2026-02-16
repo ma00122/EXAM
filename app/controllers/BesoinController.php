@@ -3,8 +3,6 @@ namespace app\controllers;
 
 use flight\Engine;
 use app\models\Besoin;
-use app\models\Ville;
-use app\models\TypeBesoin;
 use Flight;
 
 /**
@@ -24,23 +22,11 @@ class BesoinController
      */
     public function index(): void
     {
-        // Récupérer les filtres
-        $ville_id = Flight::request()->query->ville_id ?? null;
-        $type_id = Flight::request()->query->type_id ?? null;
+        // Récupérer tous les besoins avec détails
+        $besoins = Besoin::getAllBesoinsWithDetails();
 
-        // Filtrer ou récupérer tous les besoins
-        if ($ville_id || $type_id) {
-            $besoins = Besoin::filterBesoins(
-                $ville_id ? (int) $ville_id : null,
-                $type_id ? (int) $type_id : null
-            );
-        } else {
-            $besoins = Besoin::getAllBesoinsWithDetails();
-        }
-
-        // Récupérer les villes et types pour les filtres
-        $villes = Ville::getAllVilles();
-        $types = TypeBesoin::getAllTypes();
+        // Récupérer les types pour affichage
+        $types = Besoin::getAllTypes();
 
         // Message flash
         $success = $_SESSION['flash_success'] ?? null;
@@ -50,10 +36,7 @@ class BesoinController
         Flight::render('besoins/index', [
             'pageTitle' => 'Liste des Besoins',
             'besoins' => $besoins,
-            'villes' => $villes,
             'types' => $types,
-            'selectedVille' => $ville_id,
-            'selectedType' => $type_id,
             'success' => $success,
             'error' => $error
         ]);
@@ -64,12 +47,10 @@ class BesoinController
      */
     public function create(): void
     {
-        $villes = Ville::getAllVilles();
-        $types = TypeBesoin::getAllTypes();
+        $types = Besoin::getAllTypes();
 
         Flight::render('besoins/create', [
             'pageTitle' => 'Ajouter un Besoin',
-            'villes' => $villes,
             'types' => $types
         ]);
     }
@@ -80,7 +61,6 @@ class BesoinController
     public function store(): void
     {
         $data = [
-            'ville_id' => Flight::request()->data->ville_id,
             'type_id' => Flight::request()->data->type_id,
             'produit' => Flight::request()->data->produit,
             'quantite' => Flight::request()->data->quantite,
@@ -121,13 +101,11 @@ class BesoinController
             return;
         }
 
-        $villes = Ville::getAllVilles();
-        $types = TypeBesoin::getAllTypes();
+        $types = Besoin::getAllTypes();
 
         Flight::render('besoins/edit', [
             'pageTitle' => 'Modifier le Besoin',
             'besoin' => $besoin,
-            'villes' => $villes,
             'types' => $types
         ]);
     }
@@ -189,10 +167,6 @@ class BesoinController
     private function validateBesoinData(array $data): array
     {
         $errors = [];
-
-        if (empty($data['ville_id']) || (int) $data['ville_id'] <= 0) {
-            $errors[] = 'Veuillez sélectionner une ville.';
-        }
 
         if (empty($data['type_id']) || (int) $data['type_id'] <= 0) {
             $errors[] = 'Veuillez sélectionner un type de besoin.';
