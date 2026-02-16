@@ -1,47 +1,48 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-5 py-4">
+    <footer class="mt-5 py-4" style="background-color: #1a365d;">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5><i class="bi bi-arrow-left-right"></i> Takalo-Takalo</h5>
-                    <p class="text-muted">
-                        Plateforme d'échange d'objets entre particuliers.<br>
-                        Échangez vos objets facilement et en toute sécurité.
+                    <h5><i class="bi bi-building"></i> BNGRC</h5>
+                    <p class="text-light opacity-75">
+                        Bureau National de Gestion des Risques et Catastrophes<br>
+                        Système de gestion des dons et distribution
                     </p>
                 </div>
                 <div class="col-md-4">
-                    <h5>Liens utiles</h5>
+                    <h5>Modules</h5>
                     <ul class="list-unstyled">
-                        <li><a href="/objets"><i class="bi bi-grid"></i> Parcourir les objets</a></li>
-                        <li><a href="/register"><i class="bi bi-person-plus"></i> S'inscrire</a></li>
-                        <li><a href="/login"><i class="bi bi-box-arrow-in-right"></i> Connexion</a></li>
+                        <li><a href="/villes"><i class="bi bi-geo-alt"></i> Gestion des Villes</a></li>
+                        <li><a href="/besoins"><i class="bi bi-list-check"></i> Gestion des Besoins</a></li>
+                        <li><a href="/dons"><i class="bi bi-gift"></i> Dons Nature</a></li>
+                        <li><a href="/dons-argent"><i class="bi bi-cash-stack"></i> Dons Argent</a></li>
+                        <li><a href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
+                        <li><a href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
-                    <h5>Catégories populaires</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="/objets?category=1"><i class="bi bi-tag"></i> Vêtements</a></li>
-                        <li><a href="/objets?category=2"><i class="bi bi-book"></i> Livres</a></li>
-                        <li><a href="/objets?category=4"><i class="bi bi-phone"></i> Électronique</a></li>
-                    </ul>
+                    <h5>Projet Final S3</h5>
+                    <p class="text-light opacity-75 mb-2">
+                        Extension V2 – Achat Don Argent + Simulation + Récap Ajax
+                    </p>
+                    <p class="mb-0">
+                        <strong>Équipe de développement:</strong>
+                    </p>
                 </div>
             </div>
-            <hr class="my-3 border-secondary">
-            <div class="row">
+            <hr class="my-3 border-light opacity-25">
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <p class="mb-0 text-muted">
-                        &copy; <?= date('Y') ?> Takalo-Takalo - Révision Février 2026 – P18/P5DS
+                    <p class="mb-0 text-light opacity-75">
+                        &copy; <?= date('Y') ?> BNGRC - Février 2026 – P18/P5DS
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <p class="mb-0">
-                        <strong>Équipe de développement:</strong><br>
-                        <span class="badge bg-primary">Membre 1 - ETU001234</span>
-                        <span class="badge bg-success">Membre 2 - ETU001235</span>
-                        <span class="badge bg-info">Membre 3 - ETU001236</span>
-                    </p>
+                    <span class="badge bg-primary me-1"><i class="bi bi-person"></i> SEDRA - ETU004141</span>
+                    <span class="badge bg-success me-1"><i class="bi bi-person"></i> BOLTON - ETU004172</span>
+                    <span class="badge bg-info"><i class="bi bi-person"></i> MAHERY - ETU004546</span>
                 </div>
             </div>
         </div>

@@ -12,7 +12,7 @@
                     <a href="/dons" class="btn btn-success me-2">
                         <i class="bi bi-gift"></i> Dons
                     </a>
-                    <a href="/bngrc/dashboard" class="btn btn-primary">
+                    <a href="/dashboard" class="btn btn-primary">
                         <i class="bi bi-speedometer2"></i> Dashboard
                     </a>
                 </div>

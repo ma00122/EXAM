@@ -205,35 +205,27 @@ function actualiserRecap() {
     fetch('/recap/data')
         .then(response => response.json())
         .then(data => {
-            if (data.success) {
-                // Mettre à jour les montants principaux
-                document.getElementById('montant-total').textContent = formatNumber(data.total);
-                document.getElementById('montant-satisfait').textContent = formatNumber(data.satisfait);
-                document.getElementById('montant-restant').textContent = formatNumber(data.restant);
-                
-                // Mettre à jour le taux de satisfaction
-                const taux = data.details.taux_satisfaction;
-                document.getElementById('taux-satisfaction').textContent = taux + '%';
-                document.getElementById('progress-bar').style.width = taux + '%';
-                document.getElementById('progress-bar').setAttribute('aria-valuenow', taux);
-                
-                // Mettre à jour les quantités
-                document.getElementById('qty-demandee').textContent = formatNumber(data.details.quantites.total_demandee);
-                document.getElementById('qty-recue').textContent = formatNumber(data.details.quantites.total_recue);
-                document.getElementById('qty-restante').textContent = formatNumber(data.details.quantites.restante);
-                
-                // Mettre à jour les montants détaillés
-                document.getElementById('montant-nature').textContent = formatNumber(data.details.montants.satisfait_nature);
-                document.getElementById('montant-achats').textContent = formatNumber(data.details.montants.satisfait_achats);
-                document.getElementById('total-argent').textContent = formatNumber(data.details.dons.total_argent);
-                document.getElementById('argent-dispo').textContent = formatNumber(data.details.dons.argent_disponible);
-                
-                // Mettre à jour le timestamp
-                document.getElementById('last-update').textContent = data.timestamp;
-                
-                // Actualiser les besoins restants (appel séparé)
-                actualiserBesoinsRestants();
-            }
+            // Mettre à jour les montants principaux
+            document.getElementById('montant-total').textContent = formatNumber(data.total);
+            document.getElementById('montant-satisfait').textContent = formatNumber(data.satisfait);
+            document.getElementById('montant-restant').textContent = formatNumber(data.restant);
+            
+            // Mettre à jour le taux de satisfaction
+            const taux = data.total > 0 ? Math.round((data.satisfait / data.total) * 100) : 0;
+            document.getElementById('taux-satisfaction').textContent = taux + '%';
+            document.getElementById('progress-bar').style.width = taux + '%';
+            document.getElementById('progress-bar').setAttribute('aria-valuenow', taux);
+            
+            // Mettre à jour les quantités
+            document.getElementById('qty-demandee').textContent = formatNumber(data.quantite_demandee);
+            document.getElementById('qty-recue').textContent = formatNumber(data.quantite_recue);
+            document.getElementById('qty-restante').textContent = formatNumber(data.quantite_restante);
+            
+            // Mettre à jour le timestamp
+            document.getElementById('last-update').textContent = new Date().toLocaleString('fr-FR');
+            
+            // Actualiser les besoins restants (rechargement simple)
+            location.reload();
         })
         .catch(error => {
             console.error('Erreur:', error);
@@ -245,62 +237,10 @@ function actualiserRecap() {
 }
 
 /**
- * Actualiser la liste des besoins restants
- */
-function actualiserBesoinsRestants() {
-    fetch('/recap/besoins-restants')
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('count-besoins').textContent = data.count + ' besoin(s)';
-                
-                const tbody = document.getElementById('besoins-table');
-                
-                if (data.besoins.length === 0) {
-                    tbody.innerHTML = `
-                        <tr>
-                            <td colspan="7" class="text-center text-success py-4">
-                                <i class="bi bi-check-circle"></i> Tous les besoins sont satisfaits !
-                            </td>
-                        </tr>
-                    `;
-                } else {
-                    tbody.innerHTML = data.besoins.map(besoin => `
-                        <tr>
-                            <td>
-                                <strong>${escapeHtml(besoin.ville_nom)}</strong>
-                                <br><small class="text-muted">${escapeHtml(besoin.region)}</small>
-                            </td>
-                            <td>${escapeHtml(besoin.produit)}</td>
-                            <td>${formatNumber(besoin.quantite_demandee)}</td>
-                            <td class="text-success">${formatNumber(besoin.quantite_recue)}</td>
-                            <td class="text-danger"><strong>${formatNumber(besoin.quantite_restante)}</strong></td>
-                            <td>${formatNumber(besoin.prix_unitaire)} Ar</td>
-                            <td class="text-danger"><strong>${formatNumber(besoin.montant_restant)} Ar</strong></td>
-                        </tr>
-                    `).join('');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Erreur besoins:', error);
-        });
-}
-
-/**
  * Formater un nombre avec séparateurs de milliers
  */
 function formatNumber(num) {
     return new Intl.NumberFormat('fr-FR').format(num);
-}
-
-/**
- * Échapper les caractères HTML
- */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
 }
 </script>
 

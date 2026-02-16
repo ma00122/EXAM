@@ -1,19 +1,16 @@
 <?php
 
-use app\controllers\AdminController;
-use app\controllers\AuthController;
-use app\controllers\EchangeController;
-use app\controllers\ObjetController;
-use app\controllers\BesoinController;
-use app\controllers\VilleController;
-use app\controllers\DonController;
-use app\controllers\SimulationController;
-use app\controllers\DashboardController;
-use app\controllers\ConfigurationController;
 use app\controllers\AchatController;
-use app\controllers\RecapController;
-use app\controllers\DonArgentController;
 use app\controllers\AttributionController;
+use app\controllers\BesoinController;
+use app\controllers\ConfigurationController;
+use app\controllers\DashboardController;
+use app\controllers\DonArgentController;
+use app\controllers\DonController;
+use app\controllers\ObjetController;
+use app\controllers\RecapController;
+use app\controllers\SimulationController;
+use app\controllers\VilleController;
 use flight\Engine;
 use flight\net\Router;
 
@@ -23,8 +20,7 @@ use flight\net\Router;
  */
 
 $router->get('/', function() use ($app) {
-    $controller = new ObjetController($app);
-    $controller->accueil();
+    $app->redirect('/dashboard');
 });
 
 /* ===================== ROUTES VILLES (BOLTON) ===================== */
@@ -91,6 +87,30 @@ $router->get('/besoins/delete/@id', function($id) use ($app) {
     $controller->delete((int) $id);
 });
 
+/* ===================== ROUTES BESOINS RESTANTS (BOLTON) ===================== */
+
+$router->get('/besoins/restants', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->restants();
+});
+
+/* ===================== ROUTES RECAP DATA API (BOLTON) ===================== */
+
+$router->get('/recap/data', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->recapData();
+});
+
+$router->get('/recap/data/ville/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->recapDataVille((int) $id);
+});
+
+$router->get('/besoins/calculer-achat/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->calculerAchat((int) $id);
+});
+
 /* ===================== ROUTES DONS (MAHERY) ===================== */
 
 $router->get('/dons', function() use ($app) {
@@ -145,28 +165,6 @@ $router->get('/simulation/results', function() use ($app) {
     $controller->results();
 });
 
-/* ===================== ROUTES SIMULATION SEDRA ===================== */
-
-$router->post('/simulation/simuler', function() use ($app) {
-    $controller = new SimulationController($app);
-    $controller->simuler();
-});
-
-$router->post('/simulation/valider', function() use ($app) {
-    $controller = new SimulationController($app);
-    $controller->valider();
-});
-
-$router->get('/recap/data', function() use ($app) {
-    $controller = new SimulationController($app);
-    $controller->recapData();
-});
-
-$router->get('/recap', function() use ($app) {
-    $controller = new SimulationController($app);
-    $controller->recap();
-});
-
 /* ===================== ROUTES DASHBOARD (MAHERY) ===================== */
 
 $router->get('/dashboard', function() use ($app) {
@@ -177,112 +175,6 @@ $router->get('/dashboard', function() use ($app) {
 $router->get('/dashboard/ville/@id', function($id) use ($app) {
     $controller = new DashboardController($app);
     $controller->villeDetail((int) $id);
-});
-/* ===================== ROUTES CONFIGURATION (MAHERY) ===================== */
-
-$router->get('/configuration', function() use ($app) {
-    $controller = new ConfigurationController($app);
-    $controller->index();
-});
-
-$router->post('/configuration/frais', function() use ($app) {
-    $controller = new ConfigurationController($app);
-    $controller->updateFrais();
-});
-
-$router->post('/configuration/update', function() use ($app) {
-    $controller = new ConfigurationController($app);
-    $controller->update();
-});
-
-$router->post('/configuration/create', function() use ($app) {
-    $controller = new ConfigurationController($app);
-    $controller->create();
-});
-
-$router->get('/configuration/delete/@cle', function($cle) use ($app) {
-    $controller = new ConfigurationController($app);
-    $controller->delete($cle);
-});
-
-$router->get('/configuration/calcul-frais', function() use ($app) {
-    $controller = new ConfigurationController($app);
-    $controller->calculFrais();
-});
-
-/* ===================== ROUTES ACHATS (MAHERY) ===================== */
-
-$router->get('/achats', function() use ($app) {
-    $controller = new AchatController($app);
-    $controller->index();
-});
-
-$router->get('/achats/create', function() use ($app) {
-    $controller = new AchatController($app);
-    $controller->create();
-});
-
-$router->post('/achats/store', function() use ($app) {
-    $controller = new AchatController($app);
-    $controller->store();
-});
-
-$router->get('/achats/show/@id', function($id) use ($app) {
-    $controller = new AchatController($app);
-    $controller->show((int) $id);
-});
-
-$router->get('/achats/edit/@id', function($id) use ($app) {
-    $controller = new AchatController($app);
-    $controller->edit((int) $id);
-});
-
-$router->post('/achats/update/@id', function($id) use ($app) {
-    $controller = new AchatController($app);
-    $controller->update((int) $id);
-});
-
-$router->get('/achats/validate/@id', function($id) use ($app) {
-    $controller = new AchatController($app);
-    $controller->validate((int) $id);
-});
-
-$router->get('/achats/cancel/@id', function($id) use ($app) {
-    $controller = new AchatController($app);
-    $controller->cancel((int) $id);
-});
-
-$router->get('/achats/delete/@id', function($id) use ($app) {
-    $controller = new AchatController($app);
-    $controller->delete((int) $id);
-});
-
-$router->get('/achats/stats', function() use ($app) {
-    $controller = new AchatController($app);
-    $controller->stats();
-});
-
-/* ===================== ROUTES RECAP + AJAX (MAHERY) ===================== */
-
-$router->get('/recap', function() use ($app) {
-    $controller = new RecapController($app);
-    $controller->index();
-});
-
-// API AJAX pour Sedra - Récupérer les données de récap en JSON
-$router->get('/recap/data', function() use ($app) {
-    $controller = new RecapController($app);
-    $controller->data();
-});
-
-$router->get('/recap/besoins-restants', function() use ($app) {
-    $controller = new RecapController($app);
-    $controller->besoinsRestants();
-});
-
-$router->get('/recap/ville/@id', function($id) use ($app) {
-    $controller = new RecapController($app);
-    $controller->parVille((int) $id);
 });
 
 /* ===================== ROUTES DONS ARGENT (MAHERY) ===================== */
@@ -347,4 +239,102 @@ $router->post('/attributions/update/@id', function($id) use ($app) {
 $router->get('/attributions/delete/@id', function($id) use ($app) {
     $controller = new AttributionController($app);
     $controller->delete((int) $id);
+});
+
+/* ===================== ROUTES ACHATS (MAHERY) ===================== */
+
+$router->get('/achats', function() use ($app) {
+    $controller = new AchatController($app);
+    $controller->index();
+});
+
+$router->get('/achats/create', function() use ($app) {
+    $controller = new AchatController($app);
+    $controller->create();
+});
+
+$router->post('/achats/store', function() use ($app) {
+    $controller = new AchatController($app);
+    $controller->store();
+});
+
+$router->get('/achats/show/@id', function($id) use ($app) {
+    $controller = new AchatController($app);
+    $controller->show((int) $id);
+});
+
+$router->get('/achats/edit/@id', function($id) use ($app) {
+    $controller = new AchatController($app);
+    $controller->edit((int) $id);
+});
+
+$router->post('/achats/update/@id', function($id) use ($app) {
+    $controller = new AchatController($app);
+    $controller->update((int) $id);
+});
+
+$router->get('/achats/delete/@id', function($id) use ($app) {
+    $controller = new AchatController($app);
+    $controller->delete((int) $id);
+});
+
+$router->post('/achats/valider/@id', function($id) use ($app) {
+    $controller = new AchatController($app);
+    $controller->valider((int) $id);
+});
+
+$router->get('/achats/stats', function() use ($app) {
+    $controller = new AchatController($app);
+    $controller->stats();
+});
+
+/* ===================== ROUTES CONFIGURATION (MAHERY) ===================== */
+
+$router->get('/configuration', function() use ($app) {
+    $controller = new ConfigurationController($app);
+    $controller->index();
+});
+
+$router->post('/configuration/frais', function() use ($app) {
+    $controller = new ConfigurationController($app);
+    $controller->updateFrais();
+});
+
+$router->post('/configuration/update', function() use ($app) {
+    $controller = new ConfigurationController($app);
+    $controller->update();
+});
+
+/* ===================== ROUTES RECAP (MAHERY) ===================== */
+
+$router->get('/recap', function() use ($app) {
+    $controller = new RecapController($app);
+    $controller->index();
+});
+
+$router->get('/recap/api/data', function() use ($app) {
+    $controller = new RecapController($app);
+    $controller->data();
+});
+
+$router->get('/recap/api/besoins-restants', function() use ($app) {
+    $controller = new RecapController($app);
+    $controller->besoinsRestants();
+});
+
+$router->get('/recap/api/ville/@id', function($id) use ($app) {
+    $controller = new RecapController($app);
+    $controller->parVille((int) $id);
+});
+
+/* ===================== ROUTES SIMULATION AVANCÉE (SEDRA) ===================== */
+
+$router->post('/simulation/simuler', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->simuler();
+});
+
+$router->post('/simulation/valider', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->valider();
 });

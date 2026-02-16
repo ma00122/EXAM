@@ -6,9 +6,14 @@
             <i class="bi bi-list-check"></i> Liste des Besoins
             <span class="badge bg-primary"><?= count($besoins) ?></span>
         </h2>
-        <a href="/besoins/create" class="btn btn-success">
-            <i class="bi bi-plus-lg"></i> Ajouter un besoin
-        </a>
+        <div class="d-flex gap-2">
+            <a href="/besoins/restants" class="btn btn-warning">
+                <i class="bi bi-hourglass-split"></i> Besoins Restants
+            </a>
+            <a href="/besoins/create" class="btn btn-success">
+                <i class="bi bi-plus-lg"></i> Ajouter un besoin
+            </a>
+        </div>
     </div>
 
     <!-- Filtre par ville -->

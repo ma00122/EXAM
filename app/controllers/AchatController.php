@@ -280,11 +280,11 @@ class AchatController
 
     /**
      * Valider un achat
-     * GET /achats/validate/@id
+     * POST /achats/valider/@id
      */
-    public function validate(int $id): void
+    public function valider(int $id): void
     {
-        $result = $this->achatModel->validate($id);
+        $result = $this->achatModel->valider($id);
 
         if ($result) {
             $_SESSION['success'] = "Achat #$id validé avec succès.";
@@ -293,6 +293,15 @@ class AchatController
         }
 
         $this->app->redirect('/achats');
+    }
+
+    /**
+     * Valider un achat (alias)
+     * GET /achats/validate/@id
+     */
+    public function validate(int $id): void
+    {
+        $this->valider($id);
     }
 
     /* ===================== ANNULATION ===================== */

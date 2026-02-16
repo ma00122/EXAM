@@ -3,29 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'Takalo-Takalo') ?> - Échange d'objets</title>
+    <title><?= htmlspecialchars($pageTitle ?? 'BNGRC') ?> - Gestion des Dons</title>
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .navbar-brand { font-weight: bold; }
-        .card-objet { transition: transform 0.2s; }
-        .card-objet:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .badge-statut-disponible { background-color: #28a745; }
-        .badge-statut-en_echange { background-color: #ffc107; color: #000; }
-        .badge-statut-echange { background-color: #6c757d; }
+        .card-stat { transition: transform 0.2s; }
+        .card-stat:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .prix-estimatif { font-size: 1.2em; font-weight: bold; color: #198754; }
-        .hero-section { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 3rem 0; }
-        footer { background-color: #343a40; color: white; }
-        footer a { color: #adb5bd; }
+        .hero-section { background: linear-gradient(135deg, #2c5282 0%, #1a365d 100%); color: white; padding: 3rem 0; }
+        footer { background-color: #1a365d; color: white; }
+        footer a { color: #90cdf4; }
         footer a:hover { color: white; }
+        .nav-link.active { background-color: rgba(255,255,255,0.1); border-radius: 5px; }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1a365d;">
         <div class="container">
-            <a class="navbar-brand" href="/">
-                <i class="bi bi-arrow-left-right"></i> Takalo-Takalo
+            <a class="navbar-brand" href="/dashboard">
+                <i class="bi bi-building"></i> BNGRC
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -33,87 +31,56 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Accueil</a>
+                        <a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
                     </li>
                     
-                    <!-- Menu BNGRC -->
+                    <!-- Menu Gestion -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-building"></i> BNGRC
+                            <i class="bi bi-folder"></i> Gestion
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/villes"><i class="bi bi-geo-alt"></i> Villes</a></li>
                             <li><a class="dropdown-item" href="/besoins"><i class="bi bi-list-check"></i> Besoins</a></li>
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/dons"><i class="bi bi-gift"></i> Dons Nature</a></li>
                             <li><a class="dropdown-item" href="/dons-argent"><i class="bi bi-cash-stack"></i> Dons Argent</a></li>
-                            <li><a class="dropdown-item" href="/attributions"><i class="bi bi-arrow-left-right"></i> Attributions</a></li>
-                            <li><a class="dropdown-item" href="/achats"><i class="bi bi-cart-check"></i> Achats</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
-                            <li><a class="dropdown-item" href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
-                            <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/configuration"><i class="bi bi-gear"></i> Configuration</a></li>
                         </ul>
                     </li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link" href="/objets"><i class="bi bi-grid"></i> Objets</a>
+
+                    <!-- Menu Opérations -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-arrow-left-right"></i> Opérations
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/attributions"><i class="bi bi-arrow-left-right"></i> Attributions</a></li>
+                            <li><a class="dropdown-item" href="/achats"><i class="bi bi-cart-check"></i> Achats</a></li>
+                        </ul>
                     </li>
-                    <?php if (isset($_SESSION['user'])): ?>
+
+                    <!-- Simulation -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/mes-objets"><i class="bi bi-box"></i> Mes objets</a>
+                        <a class="nav-link" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a>
                     </li>
+
+                    <!-- Récapitulatif -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/echanges"><i class="bi bi-arrow-left-right"></i> Mes échanges</a>
+                        <a class="nav-link" href="/recap"><i class="bi bi-clipboard-data"></i> Récap</a>
                     </li>
-                    <?php endif; ?>
+
+                    <!-- Configuration -->
+                    <li class="nav-item">
+                        <a class="nav-link" href="/configuration"><i class="bi bi-gear"></i> Config</a>
+                    </li>
                 </ul>
                 
-                <!-- Barre de recherche -->
-                <form class="d-flex me-3" action="/objets" method="GET">
-                    <input class="form-control me-2" type="search" name="q" placeholder="Rechercher..." 
-                           value="<?= htmlspecialchars($_GET['q'] ?? '') ?>">
-                    <button class="btn btn-outline-light" type="submit">
-                        <i class="bi bi-search"></i>
-                    </button>
-                </form>
-                
                 <ul class="navbar-nav">
-                    <?php if (isset($_SESSION['user'])): ?>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                                <i class="bi bi-person-circle"></i> 
-                                <?= htmlspecialchars($_SESSION['user']['prenom'] . ' ' . $_SESSION['user']['nom']) ?>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Tableau de bord</a></li>
-                                <li><a class="dropdown-item" href="/mes-objets"><i class="bi bi-box"></i> Mes objets</a></li>
-                                <li><a class="dropdown-item" href="/echanges"><i class="bi bi-arrow-left-right"></i> Mes échanges</a></li>
-                                <?php if (isset($_SESSION['user']['role']) && $_SESSION['user']['role'] === 'admin'): ?>
-                                <li><hr class="dropdown-divider"></li>
-                                <li><a class="dropdown-item text-warning" href="/admin"><i class="bi bi-gear"></i> Administration</a></li>
-                                <?php endif; ?>
-                                <li><hr class="dropdown-divider"></li>
-                                <li>
-                                    <form action="/logout" method="POST" class="d-inline">
-                                        <button type="submit" class="dropdown-item text-danger">
-                                            <i class="bi bi-box-arrow-right"></i> Déconnexion
-                                        </button>
-                                    </form>
-                                </li>
-                            </ul>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link" href="/login"><i class="bi bi-box-arrow-in-right"></i> Connexion</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link btn btn-primary text-white ms-2" href="/register">
-                                <i class="bi bi-person-plus"></i> Inscription
-                            </a>
-                        </li>
-                    <?php endif; ?>
+                    <li class="nav-item">
+                        <span class="nav-link text-light">
+                            <i class="bi bi-calendar3"></i> <?= date('d/m/Y') ?>
+                        </span>
+                    </li>
                 </ul>
             </div>
         </div>

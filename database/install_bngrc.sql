@@ -139,7 +139,7 @@ CREATE TABLE IF NOT EXISTS achat (
     id INT AUTO_INCREMENT PRIMARY KEY,
     ville_id INT NOT NULL,
     besoin_id INT NOT NULL,
-    don_argent_id INT DEFAULT NULL COMMENT 'ID du don argent utilisé (si applicable)',
+    don_id INT DEFAULT NULL COMMENT 'ID du don utilisé pour l achat (peut être NULL si argent groupé)',
     montant_produit DECIMAL(15, 2) NOT NULL COMMENT 'Montant HT du produit acheté',
     frais DECIMAL(15, 2) NOT NULL DEFAULT 0 COMMENT 'Frais appliqués sur l achat',
     montant_total DECIMAL(15, 2) NOT NULL COMMENT 'Montant total = montant_produit + frais',
