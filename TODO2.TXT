@@ -1,0 +1,203 @@
+PROJET FINAL S3 – BNGRC
+EXTENSION V2 – ACHAT DON ARGENT + SIMULATION + RECAP AJAX
+Durée totale estimée : 4h
+Membres :
+ETU004141 – SEDRA
+ETU004172 – BOLTON
+ETU004546 – MAHERY
+
+ETU004141 – SEDRA
+
+MODULE SIMULATION + VALIDATION + AJAX
+Temps estimé : 1h30
+
+Préparer SimulationController.php
+
+Bouton SIMULER :
+
+Recuperer dons nature et dons argent
+
+Recuperer besoins par ville
+
+Exemple biens :
+
+Riz, quantite, prix_unitaire
+
+Tole, quantite, prix_unitaire
+
+Clous, quantite, prix_unitaire
+
+Huile, quantite, prix_unitaire
+
+Argent (montant)
+
+Appliquer dispatch dons nature par produit
+
+Appliquer achat avec dons argent
+
+Calcul frais configurable
+
+Gerer achat partiel si argent insuffisant
+
+Afficher preview resultat (avant validation)
+
+Ne rien modifier en base
+
+Bouton VALIDER :
+
+Inserer attributions (table attribution)
+
+Inserer achats (table achat)
+
+Mettre a jour quantites dons et besoins
+
+Gérer messages d’erreur :
+
+Pas assez argent pour achat
+
+Aucun besoin correspondant au don
+
+Page besoins restants + Ajax :
+
+Recuperer via GET /recap/data JSON :
+
+{
+  "total": xxx,
+  "satisfait": xxx,
+  "restant": xxx
+}
+
+
+Afficher :
+
+Quantite demandee
+
+Quantite recue
+
+Quantite restante
+
+Montant restant
+
+Bouton Actualiser : fetch Ajax pour recharger les montants sans recharger la page
+
+Verification coherence montants apres simulation
+
+Tester plusieurs cas :
+
+Plusieurs villes
+
+Plusieurs dons
+
+Achat partiel
+
+ETU004172 – BOLTON
+
+MODULE BESOINS + CALCULS FINANCIERS
+Temps estimé : 1h15
+
+Table besoin :
+
+id, ville_id, type (nature / materiaux / argent), produit, quantite, prix_unitaire, date_saisie
+
+Bloquer modification prix_unitaire
+
+Ajouter calculs financiers :
+
+montant_total = quantite * prix_unitaire
+
+montant_restant = montant_total - montant_satisfait
+
+Ajouter fonctions globales :
+
+getMontantTotalGlobal()
+
+getMontantSatisfaitGlobal()
+
+getMontantRestantGlobal()
+
+Page besoins restants :
+
+Afficher : quantite demandee, recue, restante, montant restant
+
+Integrer calcul achat avec frais pour simulation
+
+Verification coherence montants apres simulation
+
+ETU004546 – MAHERY
+
+MODULE INFRASTRUCTURE + CRUD + ACHATS
+Temps estimé : 1h15
+
+Creer tables :
+
+configuration (frais_achat_pourcentage)
+
+achat (ville_id, besoin_id, montant_produit, frais, montant_total, date)
+
+CRUD villes
+
+CRUD dons (nature + argent)
+
+Exemples dons :
+
+Riz 60, Tole 50, Huile 30, Argent 150 000
+
+CRUD attribution
+
+Interface modification frais achat
+
+Page liste achats filtrable par ville
+
+Ajouter route GET /recap/data pour Ajax (Sedra l’utilise)
+
+Page recap :
+
+Afficher besoins totaux, satisfaits, restants
+
+Ajouter bouton Actualiser Ajax
+
+Tester affichage achats et recap dynamique
+
+TEST FINAL ET VALIDATION – COLLABORATIF
+
+Temps estimé : 30 minutes
+
+Tester simulation simple
+
+Tester simulation multiple
+
+Tester achat avec don argent suffisant
+
+Tester achat avec don argent insuffisant (partiel)
+
+Verifier frais applique
+
+Verifier recap dynamique (Ajax)
+
+Verification coherence montants, quantites, messages erreurs
+
+PRIORITE ET LOGIQUE CHRONOLOGIQUE
+
+MAHERY : Tables + CRUD + configuration
+
+BOLTON : Besoins + calculs financiers + preparation montants
+
+SEDRA : Simulation + validation + gestion achats + preview + Ajax
+
+MAHERY & BOLTON : Page recap + Ajax + verification
+
+Tous : Test final global
+
+POINTS CLÉS POUR RENDU
+
+Simulation preview avant validation
+
+Frais achat applique correctement
+
+Achat partiel geré si don argent insuffisant
+
+Recap global exact en montant
+
+Bouton actualiser Ajax fonctionne
+
+Messages erreur affichés correctement
