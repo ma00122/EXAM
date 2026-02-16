@@ -21,8 +21,8 @@
                                 <select class="form-select" id="ville_id" name="ville_id" required>
                                     <option value="">Sélectionner une ville</option>
                                     <?php foreach ($villes as $ville): ?>
-                                    <option value="<?= $ville->id ?>">
-                                        <?= htmlspecialchars($ville->nom) ?>
+                                    <option value="<?= $ville['id'] ?>">
+                                        <?= htmlspecialchars($ville['nom']) ?>
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -37,8 +37,8 @@
                                 <select class="form-select" id="type_id" name="type_id" required>
                                     <option value="">Sélectionner un type</option>
                                     <?php foreach ($types as $type): ?>
-                                    <option value="<?= $type->id ?>">
-                                        <?= htmlspecialchars($type->nom_type) ?>
+                                    <option value="<?= $type['id'] ?>">
+                                        <?= htmlspecialchars($type['nom_type']) ?>
                                     </option>
                                     <?php endforeach; ?>
                                 </select>
@@ -113,7 +113,6 @@
 </div>
 
 <script>
-// Calcul automatique de la valeur totale
 document.addEventListener('DOMContentLoaded', function() {
     const quantiteInput = document.getElementById('quantite');
     const prixInput = document.getElementById('prix_unitaire');
@@ -133,7 +132,6 @@ document.addEventListener('DOMContentLoaded', function() {
     quantiteInput.addEventListener('input', updateValeurTotale);
     prixInput.addEventListener('input', updateValeurTotale);
 
-    // Validation du formulaire
     const form = document.getElementById('besoinForm');
     form.addEventListener('submit', function(event) {
         if (!form.checkValidity()) {
