@@ -35,7 +35,7 @@
 
             <!-- Statistiques rapides -->
             <div class="row mb-4">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="card bg-success text-white">
                         <div class="card-body text-center">
                             <h3><?= $stats['nombre_dons'] ?></h3>
@@ -44,16 +44,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-warning text-dark">
-                        <div class="card-body text-center">
-                            <h3><?= $stats['nombre_besoins'] ?></h3>
-                            <p class="mb-0">Besoins</p>
-                            <small><?= number_format($stats['total_besoins']) ?> unités demandées</small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="card bg-info text-white">
                         <div class="card-body text-center">
                             <h3><?= $stats['nombre_attributions'] ?></h3>
@@ -62,11 +53,11 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-3">
-                    <div class="card bg-<?= $stats['pourcentage_couverture'] >= 75 ? 'success' : ($stats['pourcentage_couverture'] >= 50 ? 'warning' : 'danger') ?> text-white">
+                <div class="col-md-4">
+                    <div class="card bg-<?= $stats['pourcentage_attribue'] >= 75 ? 'success' : ($stats['pourcentage_attribue'] >= 50 ? 'warning' : 'secondary') ?> text-white">
                         <div class="card-body text-center">
-                            <h3><?= $stats['pourcentage_couverture'] ?>%</h3>
-                            <p class="mb-0">Couverture</p>
+                            <h3><?= $stats['pourcentage_attribue'] ?>%</h3>
+                            <p class="mb-0">Attribué</p>
                             <small><?= number_format($stats['total_restant']) ?> unités restantes</small>
                         </div>
                     </div>
@@ -83,14 +74,14 @@
                         <div class="col-md-8">
                             <h5>Algorithme de simulation</h5>
                             <p class="text-muted mb-0">
-                                L'algorithme attribue les dons aux besoins correspondants (même produit) 
-                                en suivant l'ordre chronologique (FIFO - First In, First Out).
+                                <i class="bi bi-exclamation-triangle text-warning"></i>
+                                La simulation d'attribution nécessite le <strong>module Besoins</strong> pour fonctionner.
+                                Ce module permet de définir les besoins des villes auxquels les dons seront attribués.
                             </p>
                         </div>
                         <div class="col-md-4 text-end">
                             <form action="/simulation/run" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-lg btn-success me-2"
-                                        onclick="return confirm('Exécuter la simulation ? Cela réinitialisera les attributions existantes.')">
+                                <button type="submit" class="btn btn-lg btn-secondary me-2" disabled>
                                     <i class="bi bi-play-fill"></i> Exécuter la simulation
                                 </button>
                             </form>
@@ -107,98 +98,50 @@
                 </div>
             </div>
 
-            <div class="row">
-                <!-- Liste des dons -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-success text-white">
-                            <i class="bi bi-gift"></i> Dons disponibles
-                            <span class="badge bg-light text-dark float-end"><?= count($dons) ?></span>
-                        </div>
-                        <?php if (empty($dons)): ?>
-                        <div class="card-body">
-                            <div class="alert alert-warning mb-0">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                Aucun don enregistré. <a href="/dons/create">Ajouter un don</a>
-                            </div>
-                        </div>
-                        <?php else: ?>
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-sm table-striped mb-0">
-                                <thead class="table-dark sticky-top">
-                                    <tr>
-                                        <th>Produit</th>
-                                        <th class="text-center">Qté</th>
-                                        <th>Date</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($dons as $don): ?>
-                                    <tr>
-                                        <td>
-                                            <i class="bi bi-box-seam text-success"></i>
-                                            <?= htmlspecialchars($don['type_produit']) ?>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-success"><?= number_format($don['quantite']) ?></span>
-                                        </td>
-                                        <td>
-                                            <small><?= date('d/m/Y', strtotime($don['date_saisie'])) ?></small>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php endif; ?>
+            <!-- Liste des dons -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="bi bi-gift"></i> Dons disponibles
+                    <span class="badge bg-light text-dark float-end"><?= count($dons) ?></span>
+                </div>
+                <?php if (empty($dons)): ?>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Aucun don enregistré. <a href="/dons/create">Ajouter un don</a>
                     </div>
                 </div>
-
-                <!-- Liste des besoins -->
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-header bg-warning text-dark">
-                            <i class="bi bi-clipboard-check"></i> Besoins enregistrés
-                            <span class="badge bg-dark float-end"><?= count($besoins) ?></span>
-                        </div>
-                        <?php if (empty($besoins)): ?>
-                        <div class="card-body">
-                            <div class="alert alert-warning mb-0">
-                                <i class="bi bi-exclamation-triangle"></i>
-                                Aucun besoin enregistré. <a href="/besoins/create">Ajouter un besoin</a>
-                            </div>
-                        </div>
-                        <?php else: ?>
-                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                            <table class="table table-sm table-striped mb-0">
-                                <thead class="table-dark sticky-top">
-                                    <tr>
-                                        <th>Produit</th>
-                                        <th>Ville</th>
-                                        <th class="text-center">Qté</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <?php foreach ($besoins as $besoin): ?>
-                                    <tr>
-                                        <td>
-                                            <i class="bi bi-basket text-warning"></i>
-                                            <?= htmlspecialchars($besoin['produit']) ?>
-                                        </td>
-                                        <td>
-                                            <small><?= htmlspecialchars($besoin['ville_nom'] ?? 'N/A') ?></small>
-                                        </td>
-                                        <td class="text-center">
-                                            <span class="badge bg-warning text-dark"><?= number_format($besoin['quantite']) ?></span>
-                                        </td>
-                                    </tr>
-                                    <?php endforeach; ?>
-                                </tbody>
-                            </table>
-                        </div>
-                        <?php endif; ?>
-                    </div>
+                <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Produit</th>
+                                <th class="text-center">Quantité</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($dons as $don): ?>
+                            <tr>
+                                <td><span class="badge bg-secondary"><?= $don['id'] ?></span></td>
+                                <td>
+                                    <i class="bi bi-box-seam text-success"></i>
+                                    <?= htmlspecialchars($don['type_produit']) ?>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-success"><?= number_format($don['quantite']) ?></span>
+                                </td>
+                                <td>
+                                    <small><?= date('d/m/Y', strtotime($don['date_saisie'])) ?></small>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
                 </div>
+                <?php endif; ?>
             </div>
 
             <!-- Résultats des attributions -->
@@ -247,6 +190,10 @@
                     <i class="bi bi-info-circle"></i> Comment fonctionne l'algorithme ?
                 </div>
                 <div class="card-body">
+                    <div class="alert alert-warning mb-3">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        <strong>Module Besoins requis</strong> - La simulation nécessite la définition des besoins par ville pour fonctionner.
+                    </div>
                     <ol class="mb-0">
                         <li>Les dons sont triés par date de saisie (du plus ancien au plus récent)</li>
                         <li>Les besoins sont également triés par date de saisie</li>

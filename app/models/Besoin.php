@@ -23,49 +23,53 @@ class Besoin extends ActiveRecord
     }
 
     /**
-     * Relation avec la ville
-     */
-    public function ville(): Ville
-    {
-        return $this->belongsTo(Ville::class, 'ville_id');
-    }
-
-    /**
-     * Relation avec le type de besoin
-     */
-    public function typeBesoin(): TypeBesoin
-    {
-        return $this->belongsTo(TypeBesoin::class, 'type_id');
-    }
-
-    /**
      * Calcul automatique de la valeur totale
      * valeur_totale = quantite × prix_unitaire
      */
     public function getValeurTotale(): float
     {
-        return $this->quantite * $this->prix_unitaire;
+        return ($this->quantite ?? 0) * ($this->prix_unitaire ?? 0);
+    }
+
+    /**
+     * Récupérer toutes les villes
+     */
+    public static function getAllVilles(): array
+    {
+        $db = \Flight::db();
+        $stmt = $db->query("SELECT * FROM ville ORDER BY nom");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Récupérer tous les types de besoin
+     */
+    public static function getAllTypes(): array
+    {
+        $db = \Flight::db();
+        $stmt = $db->query("SELECT * FROM type_besoin ORDER BY id");
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
      * Insérer un nouveau besoin
      */
-    public static function insertBesoin(array $data): ?Besoin
+    public static function insertBesoin(array $data): bool
     {
         // Validation
         if (!self::validateBesoin($data)) {
-            return null;
+            return false;
         }
 
-        $besoin = new Besoin(\Flight::db());
-        $besoin->ville_id = (int) $data['ville_id'];
-        $besoin->type_id = (int) $data['type_id'];
-        $besoin->produit = trim($data['produit']);
-        $besoin->quantite = (int) $data['quantite'];
-        $besoin->prix_unitaire = (float) $data['prix_unitaire'];
-        $besoin->save();
-
-        return $besoin;
+        $db = \Flight::db();
+        $stmt = $db->prepare("INSERT INTO besoin (ville_id, type_id, produit, quantite, prix_unitaire) VALUES (?, ?, ?, ?, ?)");
+        return $stmt->execute([
+            (int) $data['ville_id'],
+            (int) $data['type_id'],
+            trim($data['produit']),
+            (int) $data['quantite'],
+            (float) $data['prix_unitaire']
+        ]);
     }
 
     /**
@@ -78,35 +82,21 @@ class Besoin extends ActiveRecord
     }
 
     /**
-     * Récupérer les besoins par ville
-     */
-    public static function getBesoinsByVille(int $ville_id): array
-    {
-        $besoin = new Besoin(\Flight::db());
-        return $besoin->eq('ville_id', $ville_id)->findAll();
-    }
-
-    /**
-     * Récupérer les besoins par type
-     */
-    public static function getBesoinsByType(int $type_id): array
-    {
-        $besoin = new Besoin(\Flight::db());
-        return $besoin->eq('type_id', $type_id)->findAll();
-    }
-
-    /**
      * Récupérer un besoin par ID
      */
-    public static function getBesoinById(int $id): ?Besoin
+    public static function getBesoinById(int $id): ?array
     {
-        $besoin = new Besoin(\Flight::db());
-        $besoin->eq('id', $id)->find();
-        // Vérifier si le besoin existe (id chargé)
-        if ($besoin->id === null) {
-            return null;
-        }
-        return $besoin;
+        $db = \Flight::db();
+        $stmt = $db->prepare("
+            SELECT b.*, t.nom_type as type_nom, v.nom as ville_nom 
+            FROM besoin b 
+            LEFT JOIN type_besoin t ON b.type_id = t.id 
+            LEFT JOIN ville v ON b.ville_id = v.id
+            WHERE b.id = ?
+        ");
+        $stmt->execute([$id]);
+        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        return $result ?: null;
     }
 
     /**
@@ -119,29 +109,19 @@ class Besoin extends ActiveRecord
             return false;
         }
 
-        $besoin = self::getBesoinById($id);
-        if (!$besoin) {
-            return false;
-        }
-
-        $besoin->quantite = $quantite;
-        $besoin->save();
-
-        return true;
+        $db = \Flight::db();
+        $stmt = $db->prepare("UPDATE besoin SET quantite = ?, updated_at = NOW() WHERE id = ?");
+        return $stmt->execute([$quantite, $id]);
     }
 
     /**
-     * Supprimer un besoin
+     * Supprimer un besoin SSSS
      */
     public static function deleteBesoin(int $id): bool
     {
-        $besoin = self::getBesoinById($id);
-        if (!$besoin) {
-            return false;
-        }
-
-        $besoin->delete();
-        return true;
+        $db = \Flight::db();
+        $stmt = $db->prepare("DELETE FROM besoin WHERE id = ?");
+        return $stmt->execute([$id]);
     }
 
     /**
@@ -149,6 +129,21 @@ class Besoin extends ActiveRecord
      */
     public static function validateBesoin(array $data): bool
     {
+        // ville_id requis
+        if (!isset($data['ville_id']) || (int) $data['ville_id'] <= 0) {
+            return false;
+        }
+
+        // type_id requis
+        if (!isset($data['type_id']) || (int) $data['type_id'] <= 0) {
+            return false;
+        }
+
+        // produit non vide
+        if (!isset($data['produit']) || empty(trim($data['produit']))) {
+            return false;
+        }
+
         // quantite > 0
         if (!isset($data['quantite']) || (int) $data['quantite'] <= 0) {
             return false;
@@ -159,69 +154,42 @@ class Besoin extends ActiveRecord
             return false;
         }
 
-        // produit non vide
-        if (!isset($data['produit']) || empty(trim($data['produit']))) {
-            return false;
-        }
-
-        // ville_id et type_id requis
-        if (!isset($data['ville_id']) || (int) $data['ville_id'] <= 0) {
-            return false;
-        }
-
-        if (!isset($data['type_id']) || (int) $data['type_id'] <= 0) {
-            return false;
-        }
-
         return true;
     }
 
     /**
-     * Récupérer tous les besoins avec jointures (ville et type)
+     * Récupérer tous les besoins avec détails
      */
     public static function getAllBesoinsWithDetails(): array
     {
         $db = \Flight::db();
         $sql = "
-            SELECT b.*, v.nom as ville_nom, t.nom_type as type_nom
+            SELECT b.*, t.nom_type as type_nom, v.nom as ville_nom
             FROM besoin b
-            LEFT JOIN ville v ON b.ville_id = v.id
             LEFT JOIN type_besoin t ON b.type_id = t.id
-            ORDER BY b.created_at DESC
+            LEFT JOIN ville v ON b.ville_id = v.id
+            ORDER BY b.id DESC
         ";
         $stmt = $db->query($sql);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 
     /**
-     * Filtrer les besoins par ville et/ou type
+     * Récupérer les besoins pour une ville donnée
      */
-    public static function filterBesoins(?int $ville_id = null, ?int $type_id = null): array
+    public static function getBesoinsByVille(int $ville_id): array
     {
         $db = \Flight::db();
         $sql = "
-            SELECT b.*, v.nom as ville_nom, t.nom_type as type_nom
+            SELECT b.*, t.nom_type as type_nom, v.nom as ville_nom
             FROM besoin b
-            LEFT JOIN ville v ON b.ville_id = v.id
             LEFT JOIN type_besoin t ON b.type_id = t.id
-            WHERE 1=1
+            LEFT JOIN ville v ON b.ville_id = v.id
+            WHERE b.ville_id = :ville_id
+            ORDER BY b.id DESC
         ";
-        $params = [];
-
-        if ($ville_id !== null) {
-            $sql .= " AND b.ville_id = ?";
-            $params[] = $ville_id;
-        }
-
-        if ($type_id !== null) {
-            $sql .= " AND b.type_id = ?";
-            $params[] = $type_id;
-        }
-
-        $sql .= " ORDER BY b.created_at DESC";
-
         $stmt = $db->prepare($sql);
-        $stmt->execute($params);
+        $stmt->execute([':ville_id' => $ville_id]);
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
 }
