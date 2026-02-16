@@ -35,7 +35,7 @@
 
             <!-- Statistiques rapides -->
             <div class="row mb-4">
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card bg-success text-white">
                         <div class="card-body text-center">
                             <h3><?= $stats['nombre_dons'] ?></h3>
@@ -44,7 +44,16 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
+                    <div class="card bg-warning text-dark">
+                        <div class="card-body text-center">
+                            <h3><?= $stats['nombre_besoins'] ?? 0 ?></h3>
+                            <p class="mb-0">Besoins</p>
+                            <small><?= number_format($stats['total_besoins'] ?? 0) ?> unités</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
                     <div class="card bg-info text-white">
                         <div class="card-body text-center">
                             <h3><?= $stats['nombre_attributions'] ?></h3>
@@ -53,7 +62,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="card bg-<?= $stats['pourcentage_attribue'] >= 75 ? 'success' : ($stats['pourcentage_attribue'] >= 50 ? 'warning' : 'secondary') ?> text-white">
                         <div class="card-body text-center">
                             <h3><?= $stats['pourcentage_attribue'] ?>%</h3>
@@ -65,6 +74,7 @@
             </div>
 
             <!-- Actions de simulation -->
+            <?php $canSimulate = !empty($besoins) && !empty($dons); ?>
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <i class="bi bi-gear"></i> Actions
@@ -73,15 +83,23 @@
                     <div class="row align-items-center">
                         <div class="col-md-8">
                             <h5>Algorithme de simulation</h5>
+                            <?php if ($canSimulate): ?>
+                            <p class="text-success mb-0">
+                                <i class="bi bi-check-circle"></i>
+                                <strong><?= count($dons) ?> don(s)</strong> et <strong><?= count($besoins) ?> besoin(s)</strong> prêts pour la simulation.
+                            </p>
+                            <?php else: ?>
                             <p class="text-muted mb-0">
                                 <i class="bi bi-exclamation-triangle text-warning"></i>
-                                La simulation d'attribution nécessite le <strong>module Besoins</strong> pour fonctionner.
-                                Ce module permet de définir les besoins des villes auxquels les dons seront attribués.
+                                La simulation nécessite des <a href="/dons"><strong>dons</strong></a> et des <a href="/besoins"><strong>besoins</strong></a> pour fonctionner.
                             </p>
+                            <?php endif; ?>
                         </div>
                         <div class="col-md-4 text-end">
                             <form action="/simulation/run" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-lg btn-secondary me-2" disabled>
+                                <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'primary' : 'secondary' ?> me-2" 
+                                        <?= !$canSimulate ? 'disabled' : '' ?>
+                                        onclick="return confirm('Exécuter la simulation d\'attribution ?')">
                                     <i class="bi bi-play-fill"></i> Exécuter la simulation
                                 </button>
                             </form>
@@ -144,6 +162,57 @@
                 <?php endif; ?>
             </div>
 
+            <!-- Liste des besoins -->
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-dark">
+                    <i class="bi bi-box-seam"></i> Besoins des villes
+                    <span class="badge bg-dark float-end"><?= count($besoins) ?></span>
+                </div>
+                <?php if (empty($besoins)): ?>
+                <div class="card-body">
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle"></i>
+                        Aucun besoin enregistré. <a href="/besoins/create">Ajouter un besoin</a>
+                    </div>
+                </div>
+                <?php else: ?>
+                <div class="table-responsive">
+                    <table class="table table-striped mb-0">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>#</th>
+                                <th>Produit</th>
+                                <th>Ville</th>
+                                <th class="text-center">Quantité</th>
+                                <th>Type</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach ($besoins as $besoin): ?>
+                            <tr>
+                                <td><span class="badge bg-secondary"><?= $besoin['id'] ?></span></td>
+                                <td>
+                                    <i class="bi bi-box text-warning"></i>
+                                    <?= htmlspecialchars($besoin['produit']) ?>
+                                </td>
+                                <td>
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                    <?= htmlspecialchars($besoin['ville_nom'] ?? 'N/A') ?>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-warning text-dark"><?= number_format($besoin['quantite']) ?></span>
+                                </td>
+                                <td>
+                                    <small class="text-muted"><?= htmlspecialchars($besoin['type_nom'] ?? 'N/A') ?></small>
+                                </td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+                <?php endif; ?>
+            </div>
+
             <!-- Résultats des attributions -->
             <?php if (!empty($attributions)): ?>
             <div class="card mt-4">
@@ -156,10 +225,10 @@
                         <thead class="table-dark">
                             <tr>
                                 <th>#</th>
-                                <th>Don</th>
+                                <th>Don (Produit)</th>
                                 <th>→</th>
-                                <th>Besoin</th>
-                                <th class="text-center">Quantité</th>
+                                <th>Besoin (Ville)</th>
+                                <th class="text-center">Quantité attribuée</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -167,14 +236,20 @@
                             <tr>
                                 <td><span class="badge bg-secondary"><?= $attr['id'] ?></span></td>
                                 <td>
+                                    <i class="bi bi-gift text-success"></i>
                                     <a href="/dons/<?= $attr['don_id'] ?>">
-                                        Don #<?= $attr['don_id'] ?> - <?= htmlspecialchars($attr['type_produit']) ?>
+                                        <?= htmlspecialchars($attr['type_produit']) ?>
                                     </a>
+                                    <small class="text-muted">(Don #<?= $attr['don_id'] ?>)</small>
                                 </td>
-                                <td><i class="bi bi-arrow-right text-info"></i></td>
-                                <td>Besoin #<?= $attr['besoin_id'] ?></td>
+                                <td><i class="bi bi-arrow-right text-info fs-5"></i></td>
+                                <td>
+                                    <i class="bi bi-geo-alt text-primary"></i>
+                                    <strong><?= htmlspecialchars($attr['ville_nom'] ?? 'Ville #' . $attr['ville_id']) ?></strong>
+                                    <small class="text-muted">(Besoin #<?= $attr['besoin_id'] ?>)</small>
+                                </td>
                                 <td class="text-center">
-                                    <span class="badge bg-info"><?= number_format($attr['quantite_attribuee']) ?></span>
+                                    <span class="badge bg-info fs-6"><?= number_format($attr['quantite_attribuee']) ?></span>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -190,15 +265,11 @@
                     <i class="bi bi-info-circle"></i> Comment fonctionne l'algorithme ?
                 </div>
                 <div class="card-body">
-                    <div class="alert alert-warning mb-3">
-                        <i class="bi bi-exclamation-triangle"></i>
-                        <strong>Module Besoins requis</strong> - La simulation nécessite la définition des besoins par ville pour fonctionner.
-                    </div>
                     <ol class="mb-0">
-                        <li>Les dons sont triés par date de saisie (du plus ancien au plus récent)</li>
-                        <li>Les besoins sont également triés par date de saisie</li>
-                        <li>Pour chaque don, l'algorithme recherche les besoins correspondants (même produit)</li>
-                        <li>La quantité attribuée = minimum(don disponible, besoin restant)</li>
+                        <li>Les <strong>dons</strong> sont triés par date de saisie (du plus ancien au plus récent)</li>
+                        <li>Les <strong>besoins</strong> sont également triés par date de création</li>
+                        <li>Pour chaque don, l'algorithme recherche les besoins correspondants (<strong>même produit</strong>)</li>
+                        <li>La quantité attribuée = <code>min(don disponible, besoin restant)</code></li>
                         <li>L'attribution est enregistrée et les quantités sont mises à jour</li>
                         <li>Le processus continue jusqu'à épuisement du don ou des besoins</li>
                     </ol>

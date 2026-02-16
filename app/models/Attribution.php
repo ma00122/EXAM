@@ -41,14 +41,19 @@ class Attribution
     /* ===================== READ ===================== */
 
     /**
-     * Récupérer toutes les attributions
+     * Récupérer toutes les attributions avec détails dons et besoins
      * @return array Liste des attributions
      */
     public function getAllAttributions(): array
     {
-        $sql = "SELECT a.*, d.type_produit, d.quantite as don_quantite, d.date_saisie as don_date
+        $sql = "SELECT a.*, 
+                       d.type_produit, d.quantite as don_quantite, d.date_saisie as don_date,
+                       b.produit as besoin_produit, b.quantite as besoin_quantite, b.ville_id,
+                       v.nom as ville_nom
                 FROM attribution a
                 JOIN don d ON a.don_id = d.id
+                JOIN besoin b ON a.besoin_id = b.id
+                LEFT JOIN ville v ON b.ville_id = v.id
                 ORDER BY a.id ASC";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);

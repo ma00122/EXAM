@@ -3,6 +3,7 @@ namespace app\controllers;
 
 use flight\Engine;
 use app\models\Don;
+use app\models\Besoin;
 use app\models\Attribution;
 use Flight;
 
@@ -11,8 +12,8 @@ use Flight;
  * Projet BNGRC - Module Mahery
  * 
  * ALGORITHME DE SIMULATION :
- * Ce module affiche les statistiques des dons et attributions.
- * La logique de simulation nécessite le module Besoins pour fonctionner complètement.
+ * Ce module attribue les dons aux besoins des villes.
+ * La logique de simulation utilise le module Besoins pour fonctionner.
  */
 class SimulationController
 {
@@ -37,13 +38,19 @@ class SimulationController
     {
         $dons = $this->donModel->getAllDons();
         $attributions = $this->attributionModel->getAllAttributions();
+        
+        // Récupérer les besoins pour la simulation
+        $besoins = Besoin::getAllBesoinsWithDetails();
 
         // Calculer les statistiques
         $stats = $this->calculateStats();
+        $stats['nombre_besoins'] = count($besoins);
+        $stats['total_besoins'] = array_sum(array_column($besoins, 'quantite'));
 
         $this->app->render('simulation/index', [
             'pageTitle' => 'Simulation d\'attribution',
             'dons' => $dons,
+            'besoins' => $besoins,
             'attributions' => $attributions,
             'stats' => $stats,
             'success' => $_SESSION['success'] ?? null,
@@ -79,8 +86,8 @@ class SimulationController
         // 1. Récupérer tous les dons triés par date
         $dons = $this->donModel->getDonsOrderByDate();
         
-        // 2. Récupérer tous les besoins triés par date
-        $stmt = $db->query("SELECT * FROM besoin ORDER BY date_saisie ASC, id ASC");
+        // 2. Récupérer tous les besoins triés par date (created_at si date_saisie n'existe pas)
+        $stmt = $db->query("SELECT * FROM besoin ORDER BY created_at ASC, id ASC");
         $besoins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
         
         // Tableau pour suivre les quantités restantes
