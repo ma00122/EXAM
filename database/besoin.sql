@@ -1,4 +1,22 @@
 
+-- Table Ville (nécessaire pour les besoins)
+CREATE TABLE IF NOT EXISTS ville (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nom VARCHAR(100) NOT NULL,
+    region VARCHAR(100),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Données de test pour les villes
+INSERT INTO ville (nom, region) VALUES
+('Antananarivo', 'Analamanga'),
+('Toamasina', 'Atsinanana'),
+('Antsirabe', 'Vakinankaratra'),
+('Mahajanga', 'Boeny'),
+('Fianarantsoa', 'Haute Matsiatra')
+ON DUPLICATE KEY UPDATE nom = VALUES(nom);
+
 CREATE TABLE IF NOT EXISTS type_besoin (
     id INT AUTO_INCREMENT PRIMARY KEY,
     nom_type VARCHAR(50) NOT NULL UNIQUE,
@@ -9,7 +27,8 @@ CREATE TABLE IF NOT EXISTS type_besoin (
 INSERT INTO type_besoin (nom_type) VALUES
 ('nature'),
 ('materiaux'),
-('argent');
+('argent')
+ON DUPLICATE KEY UPDATE nom_type = VALUES(nom_type);
 
 
 CREATE TABLE IF NOT EXISTS besoin (
