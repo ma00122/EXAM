@@ -3,92 +3,134 @@
 <!-- Hero Section -->
 <section class="hero-section">
     <div class="container text-center">
-        <h1><i class="bi bi-arrow-left-right"></i> Bienvenue sur Takalo-Takalo</h1>
-        <p class="lead">Échangez vos objets facilement avec d'autres utilisateurs</p>
-        <?php if (!isset($_SESSION['user'])): ?>
+        <h1><i class="bi bi-shield-check"></i> BNGRC - Gestion des Catastrophes</h1>
+        <p class="lead">Bureau National de Gestion des Risques et Catastrophes</p>
+        <p>Système de gestion des dons, besoins et attributions pour les villes sinistrées</p>
         <div class="mt-4">
-            <a href="/register" class="btn btn-light btn-lg me-2">
-                <i class="bi bi-person-plus"></i> S'inscrire
+            <a href="/simulation" class="btn btn-light btn-lg me-2">
+                <i class="bi bi-play-circle"></i> Simulation
             </a>
-            <a href="/objets" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-grid"></i> Voir les objets
+            <a href="/recap" class="btn btn-outline-light btn-lg">
+                <i class="bi bi-clipboard-data"></i> Récapitulatif
             </a>
         </div>
-        <?php else: ?>
-        <div class="mt-4">
-            <a href="/mes-objets/nouveau" class="btn btn-light btn-lg me-2">
-                <i class="bi bi-plus-circle"></i> Ajouter un objet
-            </a>
-            <a href="/objets" class="btn btn-outline-light btn-lg">
-                <i class="bi bi-grid"></i> Parcourir les objets
-            </a>
-        </div>
-        <?php endif; ?>
     </div>
 </section>
 
 <div class="container py-5">
-    <!-- Catégories -->
+    <!-- Statistiques rapides -->
     <section class="mb-5">
-        <h2 class="mb-4"><i class="bi bi-tags"></i> Catégories</h2>
-        <div class="row g-3">
-            <?php foreach ($categories as $category): ?>
-            <div class="col-6 col-md-4 col-lg-2">
-                <a href="/objets?category=<?= $category->id ?>" class="btn btn-outline-primary w-100">
-                    <?= call_user_func($e, $category->nom) ?>
-                </a>
+        <h2 class="mb-4"><i class="bi bi-bar-chart-fill"></i> Aperçu Général</h2>
+        <div class="row g-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-geo-alt fs-1 mb-2"></i>
+                        <h3>Villes</h3>
+                        <p class="mb-0">Gérer les zones sinistrées</p>
+                        <a href="/villes" class="btn btn-light btn-sm mt-3">Accéder</a>
+                    </div>
+                </div>
             </div>
-            <?php endforeach; ?>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-list-check fs-1 mb-2"></i>
+                        <h3>Besoins</h3>
+                        <p class="mb-0">Besoins des villes</p>
+                        <a href="/besoins" class="btn btn-dark btn-sm mt-3">Accéder</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-gift fs-1 mb-2"></i>
+                        <h3>Dons</h3>
+                        <p class="mb-0">Dons nature & argent</p>
+                        <a href="/dons" class="btn btn-light btn-sm mt-3">Nature</a>
+                        <a href="/dons-argent" class="btn btn-outline-light btn-sm mt-3">Argent</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-arrow-left-right fs-1 mb-2"></i>
+                        <h3>Attributions</h3>
+                        <p class="mb-0">Distribution des dons</p>
+                        <a href="/attributions" class="btn btn-light btn-sm mt-3">Accéder</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Derniers objets -->
-    <section>
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2><i class="bi bi-clock-history"></i> Derniers objets ajoutés</h2>
-            <a href="/objets" class="btn btn-primary">Voir tous les objets <i class="bi bi-arrow-right"></i></a>
-        </div>
-
-        <?php if (empty($objets)): ?>
-        <div class="alert alert-info">
-            <i class="bi bi-info-circle"></i> Aucun objet disponible pour le moment.
-        </div>
-        <?php else: ?>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
-            <?php foreach ($objets as $objet): ?>
-            <div class="col">
-                <div class="card h-100 card-objet">
-                    <?php $photo = $objet->getPhotoPrincipale(); ?>
-                    <?php if ($photo): ?>
-                    <img src="<?= call_user_func($e, $photo->getUrl()) ?>" class="card-img-top" 
-                         alt="<?= call_user_func($e, $objet->titre) ?>" style="height: 200px; object-fit: cover;">
-                    <?php else: ?>
-                    <div class="card-img-top bg-secondary d-flex align-items-center justify-content-center" 
-                         style="height: 200px;">
-                        <i class="bi bi-image text-white" style="font-size: 3rem;"></i>
+    <!-- Actions principales -->
+    <section class="mb-5">
+        <h2 class="mb-4"><i class="bi bi-lightning-charge"></i> Actions Rapides</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card border-primary h-100">
+                    <div class="card-header bg-primary text-white">
+                        <i class="bi bi-play-circle"></i> Simulation
                     </div>
-                    <?php endif; ?>
                     <div class="card-body">
-                        <h5 class="card-title"><?= call_user_func($e, $objet->titre) ?></h5>
-                        <p class="card-text text-muted small">
-                            <i class="bi bi-tag"></i> <?= call_user_func($e, $objet->category->nom ?? 'N/A') ?>
-                        </p>
-                        <p class="prix-estimatif mb-2"><?= $objet->getPrixFormate() ?></p>
-                        <p class="card-text small">
-                            <i class="bi bi-person"></i> 
-                            <?= call_user_func($e, ($objet->proprietaire->prenom ?? '') . ' ' . ($objet->proprietaire->nom ?? '')) ?>
-                        </p>
-                    </div>
-                    <div class="card-footer bg-transparent">
-                        <a href="/objets/<?= $objet->id ?>" class="btn btn-primary btn-sm w-100">
-                            <i class="bi bi-eye"></i> Voir détail
+                        <p>Simuler l'attribution des dons aux besoins des villes. Preview avant validation.</p>
+                        <a href="/simulation" class="btn btn-primary">
+                            <i class="bi bi-play-fill"></i> Lancer simulation
                         </a>
                     </div>
                 </div>
             </div>
-            <?php endforeach; ?>
+            <div class="col-md-4">
+                <div class="card border-success h-100">
+                    <div class="card-header bg-success text-white">
+                        <i class="bi bi-cart-check"></i> Achats
+                    </div>
+                    <div class="card-body">
+                        <p>Gérer les achats effectués avec les dons en argent. Frais inclus.</p>
+                        <a href="/achats" class="btn btn-success">
+                            <i class="bi bi-cart-plus"></i> Voir les achats
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card border-info h-100">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-clipboard-data"></i> Récapitulatif
+                    </div>
+                    <div class="card-body">
+                        <p>Vue globale des besoins, dons et taux de satisfaction. Ajax temps réel.</p>
+                        <a href="/recap" class="btn btn-info text-white">
+                            <i class="bi bi-bar-chart"></i> Voir récap
+                        </a>
+                    </div>
+                </div>
+            </div>
         </div>
-        <?php endif; ?>
+    </section>
+
+    <!-- Configuration -->
+    <section>
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <i class="bi bi-gear"></i> Configuration Système
+            </div>
+            <div class="card-body">
+                <div class="row align-items-center">
+                    <div class="col-md-8">
+                        <p class="mb-0">Configurer les paramètres système : pourcentage de frais d'achat, montants minimums, etc.</p>
+                    </div>
+                    <div class="col-md-4 text-end">
+                        <a href="/configuration" class="btn btn-secondary">
+                            <i class="bi bi-gear-fill"></i> Configurer
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </section>
 </div>
 

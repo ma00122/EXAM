@@ -1,48 +1,49 @@
     </main>
 
     <!-- Footer -->
-    <footer class="mt-5 py-4" style="background-color: #1a365d;">
+    <footer class="mt-5 py-4">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
-                    <h5><i class="bi bi-building"></i> BNGRC</h5>
-                    <p class="text-light opacity-75">
-                        Bureau National de Gestion des Risques et Catastrophes<br>
-                        Système de gestion des dons et distribution
+                    <h5><i class="bi bi-shield-check"></i> BNGRC</h5>
+                    <p class="text-muted">
+                        Bureau National de Gestion des Risques et Catastrophes.<br>
+                        Système de gestion des dons et besoins.
                     </p>
                 </div>
                 <div class="col-md-4">
-                    <h5>Modules</h5>
+                    <h5>Liens rapides</h5>
                     <ul class="list-unstyled">
-                        <li><a href="/villes"><i class="bi bi-geo-alt"></i> Gestion des Villes</a></li>
-                        <li><a href="/besoins"><i class="bi bi-list-check"></i> Gestion des Besoins</a></li>
-                        <li><a href="/dons"><i class="bi bi-gift"></i> Dons Nature</a></li>
-                        <li><a href="/dons-argent"><i class="bi bi-cash-stack"></i> Dons Argent</a></li>
+                        <li><a href="/villes"><i class="bi bi-geo-alt"></i> Villes</a></li>
+                        <li><a href="/besoins"><i class="bi bi-list-check"></i> Besoins</a></li>
+                        <li><a href="/dons"><i class="bi bi-gift"></i> Dons</a></li>
                         <li><a href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
-                        <li><a href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
                     </ul>
                 </div>
                 <div class="col-md-4">
-                    <h5>Projet Final S3</h5>
-                    <p class="text-light opacity-75 mb-2">
-                        Extension V2 – Achat Don Argent + Simulation + Récap Ajax
-                    </p>
-                    <p class="mb-0">
-                        <strong>Équipe de développement:</strong>
-                    </p>
+                    <h5>Analyse & Récap</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
+                        <li><a href="/besoins/restants"><i class="bi bi-exclamation-triangle"></i> Besoins Restants</a></li>
+                        <li><a href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        <li><a href="/configuration"><i class="bi bi-gear"></i> Configuration</a></li>
+                    </ul>
                 </div>
             </div>
-            <hr class="my-3 border-light opacity-25">
-            <div class="row align-items-center">
+            <hr class="my-3 border-secondary">
+            <div class="row">
                 <div class="col-md-6">
-                    <p class="mb-0 text-light opacity-75">
-                        &copy; <?= date('Y') ?> BNGRC - Février 2026 – P18/P5DS
+                    <p class="mb-0 text-muted">
+                        &copy; <?= date('Y') ?> BNGRC - Projet Final S3 – Février 2026
                     </p>
                 </div>
                 <div class="col-md-6 text-md-end">
-                    <span class="badge bg-primary me-1"><i class="bi bi-person"></i> SEDRA - ETU004141</span>
-                    <span class="badge bg-success me-1"><i class="bi bi-person"></i> BOLTON - ETU004172</span>
-                    <span class="badge bg-info"><i class="bi bi-person"></i> MAHERY - ETU004546</span>
+                    <p class="mb-0">
+                        <strong>Équipe de développement:</strong><br>
+                        <span class="badge bg-primary">SEDRA - ETU004141</span>
+                        <span class="badge bg-success">BOLTON - ETU004172</span>
+                        <span class="badge bg-info">MAHERY - ETU004546</span>
+                    </p>
                 </div>
             </div>
         </div>

@@ -307,13 +307,6 @@ class Achat
 
     /**
      * Créer un achat simplifié (pour simulation)
-     * @param int $villeId ID de la ville
-     * @param int $besoinId ID du besoin
-     * @param int $donId ID du don (0 si argent groupé)
-     * @param float $montantProduit Montant produit
-     * @param float $frais Frais
-     * @param float $montantTotal Total
-     * @return int|false ID créé
      */
     public function createAchat(int $villeId, int $besoinId, int $donId, float $montantProduit, float $frais, float $montantTotal): int|false
     {
@@ -331,8 +324,6 @@ class Achat
 
     /**
      * Alias pour deleteAchat
-     * @param int $id ID de l'achat
-     * @return bool Succès
      */
     public function delete(int $id): bool
     {
@@ -341,7 +332,6 @@ class Achat
 
     /**
      * Récupérer le total des achats validés
-     * @return float Montant total validé
      */
     public function getTotalValidated(): float
     {
@@ -352,9 +342,6 @@ class Achat
 
     /**
      * Mettre à jour un achat
-     * @param int $id ID de l'achat
-     * @param array $data Données à mettre à jour
-     * @return bool Succès
      */
     public function update(int $id, array $data): bool
     {
@@ -386,8 +373,6 @@ class Achat
 
     /**
      * Valider un achat
-     * @param int $id ID de l'achat
-     * @return bool Succès
      */
     public function valider(int $id): bool
     {
@@ -398,8 +383,6 @@ class Achat
 
     /**
      * Annuler un achat
-     * @param int $id ID de l'achat
-     * @return bool Succès
      */
     public function cancel(int $id): bool
     {
@@ -410,7 +393,6 @@ class Achat
 
     /**
      * Récupérer les statistiques par ville
-     * @return array Statistiques par ville
      */
     public function getStatsByVille(): array
     {
@@ -427,7 +409,6 @@ class Achat
 
     /**
      * Récupérer le nombre d'achats par statut
-     * @return array Comptage par statut
      */
     public function getCountByStatut(): array
     {

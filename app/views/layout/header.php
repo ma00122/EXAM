@@ -3,27 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= htmlspecialchars($pageTitle ?? 'BNGRC') ?> - Gestion des Dons</title>
+    <title><?= htmlspecialchars($pageTitle ?? 'BNGRC') ?> - Gestion des Catastrophes</title>
     <link rel="stylesheet" href="/assets/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
     <style>
         .navbar-brand { font-weight: bold; }
-        .card-stat { transition: transform 0.2s; }
-        .card-stat:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .prix-estimatif { font-size: 1.2em; font-weight: bold; color: #198754; }
-        .hero-section { background: linear-gradient(135deg, #2c5282 0%, #1a365d 100%); color: white; padding: 3rem 0; }
-        footer { background-color: #1a365d; color: white; }
+        .card-bngrc { transition: transform 0.2s; }
+        .card-bngrc:hover { transform: translateY(-5px); box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .badge-statut-disponible { background-color: #28a745; }
+        .badge-statut-en_cours { background-color: #ffc107; color: #000; }
+        .badge-statut-termine { background-color: #6c757d; }
+        .montant-total { font-size: 1.2em; font-weight: bold; color: #198754; }
+        .hero-section { background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%); color: white; padding: 3rem 0; }
+        footer { background-color: #1e3a5f; color: white; }
         footer a { color: #90cdf4; }
         footer a:hover { color: white; }
-        .nav-link.active { background-color: rgba(255,255,255,0.1); border-radius: 5px; }
+        .navbar-bngrc { background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%) !important; }
     </style>
 </head>
 <body>
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg navbar-dark" style="background-color: #1a365d;">
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-bngrc">
         <div class="container">
-            <a class="navbar-brand" href="/dashboard">
-                <i class="bi bi-building"></i> BNGRC
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shield-check"></i> BNGRC
             </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
@@ -31,13 +34,13 @@
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a>
+                        <a class="nav-link" href="/"><i class="bi bi-house"></i> Accueil</a>
                     </li>
                     
                     <!-- Menu Gestion -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-folder"></i> Gestion
+                            <i class="bi bi-database"></i> Gestion
                         </a>
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/villes"><i class="bi bi-geo-alt"></i> Villes</a></li>
@@ -45,41 +48,37 @@
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/dons"><i class="bi bi-gift"></i> Dons Nature</a></li>
                             <li><a class="dropdown-item" href="/dons-argent"><i class="bi bi-cash-stack"></i> Dons Argent</a></li>
-                        </ul>
-                    </li>
-
-                    <!-- Menu Opérations -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="bi bi-arrow-left-right"></i> Opérations
-                        </a>
-                        <ul class="dropdown-menu">
+                            <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/attributions"><i class="bi bi-arrow-left-right"></i> Attributions</a></li>
                             <li><a class="dropdown-item" href="/achats"><i class="bi bi-cart-check"></i> Achats</a></li>
                         </ul>
                     </li>
-
-                    <!-- Simulation -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a>
+                    
+                    <!-- Menu Simulation & Recap -->
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="bi bi-bar-chart"></i> Analyse
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
+                            <li><a class="dropdown-item" href="/besoins/restants"><i class="bi bi-exclamation-triangle"></i> Besoins Restants</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
+                            <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                        </ul>
                     </li>
-
-                    <!-- Récapitulatif -->
-                    <li class="nav-item">
-                        <a class="nav-link" href="/recap"><i class="bi bi-clipboard-data"></i> Récap</a>
-                    </li>
-
+                    
                     <!-- Configuration -->
                     <li class="nav-item">
-                        <a class="nav-link" href="/configuration"><i class="bi bi-gear"></i> Config</a>
+                        <a class="nav-link" href="/configuration"><i class="bi bi-gear"></i> Configuration</a>
                     </li>
                 </ul>
                 
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <span class="nav-link text-light">
-                            <i class="bi bi-calendar3"></i> <?= date('d/m/Y') ?>
-                        </span>
+                        <a class="nav-link btn btn-outline-light btn-sm px-3" href="/recap">
+                            <i class="bi bi-bar-chart-fill"></i> Récap Ajax
+                        </a>
                     </li>
                 </ul>
             </div>
