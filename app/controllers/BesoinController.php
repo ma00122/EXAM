@@ -25,9 +25,6 @@ class BesoinController
         // Récupérer tous les besoins avec détails
         $besoins = Besoin::getAllBesoinsWithDetails();
 
-        // Récupérer les types pour affichage
-        $types = Besoin::getAllTypes();
-
         // Message flash
         $success = $_SESSION['flash_success'] ?? null;
         $error = $_SESSION['flash_error'] ?? null;
@@ -36,7 +33,6 @@ class BesoinController
         Flight::render('besoins/index', [
             'pageTitle' => 'Liste des Besoins',
             'besoins' => $besoins,
-            'types' => $types,
             'success' => $success,
             'error' => $error
         ]);
@@ -47,10 +43,12 @@ class BesoinController
      */
     public function create(): void
     {
+        $villes = Besoin::getAllVilles();
         $types = Besoin::getAllTypes();
 
         Flight::render('besoins/create', [
             'pageTitle' => 'Ajouter un Besoin',
+            'villes' => $villes,
             'types' => $types
         ]);
     }
@@ -61,6 +59,7 @@ class BesoinController
     public function store(): void
     {
         $data = [
+            'ville_id' => Flight::request()->data->ville_id,
             'type_id' => Flight::request()->data->type_id,
             'produit' => Flight::request()->data->produit,
             'quantite' => Flight::request()->data->quantite,
@@ -77,9 +76,9 @@ class BesoinController
         }
 
         // Insertion
-        $besoin = Besoin::insertBesoin($data);
+        $result = Besoin::insertBesoin($data);
 
-        if ($besoin) {
+        if ($result) {
             $_SESSION['flash_success'] = 'Besoin ajouté avec succès !';
             Flight::redirect('/besoins');
         } else {
@@ -101,11 +100,13 @@ class BesoinController
             return;
         }
 
+        $villes = Besoin::getAllVilles();
         $types = Besoin::getAllTypes();
 
         Flight::render('besoins/edit', [
             'pageTitle' => 'Modifier le Besoin',
             'besoin' => $besoin,
+            'villes' => $villes,
             'types' => $types
         ]);
     }
@@ -167,6 +168,10 @@ class BesoinController
     private function validateBesoinData(array $data): array
     {
         $errors = [];
+
+        if (empty($data['ville_id']) || (int) $data['ville_id'] <= 0) {
+            $errors[] = 'Veuillez sélectionner une ville.';
+        }
 
         if (empty($data['type_id']) || (int) $data['type_id'] <= 0) {
             $errors[] = 'Veuillez sélectionner un type de besoin.';

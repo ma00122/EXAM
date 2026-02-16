@@ -37,6 +37,7 @@
             <thead class="table-dark">
                 <tr>
                     <th>ID</th>
+                    <th>Ville</th>
                     <th>Type</th>
                     <th>Produit</th>
                     <th>Quantité</th>
@@ -52,9 +53,11 @@
                     $prix_unitaire = $besoin['prix_unitaire'] ?? 0;
                     $valeur_totale = $quantite * $prix_unitaire;
                     $type_nom = $besoin['type_nom'] ?? 'N/A';
+                    $ville_nom = $besoin['ville_nom'] ?? 'N/A';
                 ?>
                 <tr>
                     <td><?= $besoin['id'] ?></td>
+                    <td><span class="badge bg-info"><?= htmlspecialchars($ville_nom) ?></span></td>
                     <td>
                         <?php 
                         $badge_class = 'bg-secondary';
@@ -88,7 +91,7 @@
             </tbody>
             <tfoot class="table-secondary">
                 <tr>
-                    <td colspan="5" class="text-end fw-bold">Total Général :</td>
+                    <td colspan="6" class="text-end fw-bold">Total Général :</td>
                     <td class="text-success fw-bold">
                         <?php 
                         $total_general = 0;

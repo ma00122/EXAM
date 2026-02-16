@@ -12,20 +12,38 @@
                 <div class="card-body">
                     <form action="/besoins/store" method="POST" id="besoinForm">
                         
-                        <!-- Type de besoin -->
-                        <div class="mb-3">
-                            <label for="type_id" class="form-label">
-                                <i class="bi bi-tag"></i> Type <span class="text-danger">*</span>
-                            </label>
-                            <select class="form-select" id="type_id" name="type_id" required>
-                                <option value="">Sélectionner un type</option>
-                                <?php foreach ($types as $type): ?>
-                                <option value="<?= $type['id'] ?>">
-                                    <?= htmlspecialchars($type['nom_type']) ?>
-                                </option>
-                                <?php endforeach; ?>
-                            </select>
-                            <div class="invalid-feedback">Veuillez sélectionner un type.</div>
+                        <div class="row">
+                            <!-- Ville -->
+                            <div class="col-md-6 mb-3">
+                                <label for="ville_id" class="form-label">
+                                    <i class="bi bi-geo-alt"></i> Ville <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="ville_id" name="ville_id" required>
+                                    <option value="">Sélectionner une ville</option>
+                                    <?php foreach ($villes as $ville): ?>
+                                    <option value="<?= $ville['id'] ?>">
+                                        <?= htmlspecialchars($ville['nom']) ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="invalid-feedback">Veuillez sélectionner une ville.</div>
+                            </div>
+
+                            <!-- Type de besoin -->
+                            <div class="col-md-6 mb-3">
+                                <label for="type_id" class="form-label">
+                                    <i class="bi bi-tag"></i> Type <span class="text-danger">*</span>
+                                </label>
+                                <select class="form-select" id="type_id" name="type_id" required>
+                                    <option value="">Sélectionner un type</option>
+                                    <?php foreach ($types as $type): ?>
+                                    <option value="<?= $type['id'] ?>">
+                                        <?= htmlspecialchars($type['nom_type']) ?>
+                                    </option>
+                                    <?php endforeach; ?>
+                                </select>
+                                <div class="invalid-feedback">Veuillez sélectionner un type.</div>
+                            </div>
                         </div>
 
                         <!-- Produit -->

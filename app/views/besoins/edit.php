@@ -12,14 +12,26 @@
                 <div class="card-body">
                     <form action="/besoins/update/<?= $besoin['id'] ?>" method="POST" id="besoinEditForm">
                         
-                        <!-- Type de besoin (non modifiable) -->
-                        <div class="mb-3">
-                            <label class="form-label">
-                                <i class="bi bi-tag"></i> Type
-                            </label>
-                            <input type="text" class="form-control" 
-                                   value="<?= htmlspecialchars($besoin['type_nom'] ?? 'N/A') ?>" disabled readonly>
-                            <small class="text-muted">Non modifiable</small>
+                        <div class="row">
+                            <!-- Ville (non modifiable) -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-geo-alt"></i> Ville
+                                </label>
+                                <input type="text" class="form-control" 
+                                       value="<?= htmlspecialchars($besoin['ville_nom'] ?? 'N/A') ?>" disabled readonly>
+                                <small class="text-muted">Non modifiable</small>
+                            </div>
+
+                            <!-- Type de besoin (non modifiable) -->
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">
+                                    <i class="bi bi-tag"></i> Type
+                                </label>
+                                <input type="text" class="form-control" 
+                                       value="<?= htmlspecialchars($besoin['type_nom'] ?? 'N/A') ?>" disabled readonly>
+                                <small class="text-muted">Non modifiable</small>
+                            </div>
                         </div>
 
                         <!-- Produit (non modifiable) -->
