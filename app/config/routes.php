@@ -4,6 +4,7 @@ use app\controllers\AdminController;
 use app\controllers\AuthController;
 use app\controllers\EchangeController;
 use app\controllers\ObjetController;
+use app\controllers\VilleController;
 use flight\Engine;
 use flight\net\Router;
 
@@ -187,4 +188,54 @@ $router->post('/admin/categories/@id/modifier', function($id) use ($app) {
 $router->post('/admin/categories/@id/supprimer', function($id) use ($app) {
     $controller = new AdminController($app);
     $controller->categoriesDelete((int) $id);
+});
+
+/* ===================== ROUTES VILLES - MODULE BOLTON ===================== */
+
+// Liste des villes
+$router->get('/villes', function() use ($app) {
+    $controller = new VilleController($app);
+    $controller->index();
+});
+
+// Formulaire création ville
+$router->get('/villes/create', function() use ($app) {
+    $controller = new VilleController($app);
+    $controller->create();
+});
+
+// Enregistrer une nouvelle ville
+$router->post('/villes/store', function() use ($app) {
+    $controller = new VilleController($app);
+    $controller->store();
+});
+
+// Formulaire modification ville
+$router->get('/villes/edit/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->edit((int) $id);
+});
+
+// Mettre à jour une ville
+$router->post('/villes/update/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->update((int) $id);
+});
+
+// Supprimer une ville
+$router->get('/villes/delete/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->delete((int) $id);
+});
+
+// API JSON - Liste des villes
+$router->get('/api/villes', function() use ($app) {
+    $controller = new VilleController($app);
+    $controller->apiIndex();
+});
+
+// API JSON - Détail d'une ville
+$router->get('/api/villes/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->apiShow((int) $id);
 });
