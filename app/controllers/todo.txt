@@ -182,7 +182,7 @@ Récupérer besoins ORDER BY date_saisie ASC
 
 Pour chaque don :
 
-Chercher besoins même produit
+Chercher besoins même produit a
 
 Calculer besoin restant
 

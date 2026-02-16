@@ -4,187 +4,150 @@ use app\controllers\AdminController;
 use app\controllers\AuthController;
 use app\controllers\EchangeController;
 use app\controllers\ObjetController;
+use app\controllers\BesoinController;
+use app\controllers\VilleController;
+use app\controllers\DonController;
+use app\controllers\SimulationController;
+use app\controllers\DashboardController;
 use flight\Engine;
 use flight\net\Router;
 
-/** 
+/**
  * @var Router $router 
  * @var Engine $app
  */
-
-
 
 $router->get('/', function() use ($app) {
     $controller = new ObjetController($app);
     $controller->accueil();
 });
 
-$router->get('/objets', function() use ($app) {
-    $controller = new ObjetController($app);
-    $controller->liste();
-});
+/* ===================== ROUTES VILLES (BOLTON) ===================== */
 
-$router->get('/objets/@id', function($id) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->detail((int) $id);
-});
-
-$router->get('/objets/@id/historique', function($id) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->historique((int) $id);
-});
-
-$router->get('/register', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->register();
-});
-
-$router->post('/register', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->register();
-});
-
-$router->post('/validate', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->validate();
-});
-
-$router->get('/login', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->login();
-});
-
-$router->post('/login', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->login();
-});
-
-$router->get('/dashboard', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->dashboard();
-});
-
-$router->post('/logout', function() use ($app) {
-    $controller = new AuthController($app);
-    $controller->logout();
-});
-
-$router->get('/mes-objets', function() use ($app) {
-    $controller = new ObjetController($app);
-    $controller->mesObjets();
-});
-
-$router->get('/mes-objets/nouveau', function() use ($app) {
-    $controller = new ObjetController($app);
-    $controller->create();
-});
-
-$router->post('/mes-objets/nouveau', function() use ($app) {
-    $controller = new ObjetController($app);
-    $controller->create();
-});
-
-$router->get('/mes-objets/@id/modifier', function($id) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->edit((int) $id);
-});
-
-$router->post('/mes-objets/@id/modifier', function($id) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->edit((int) $id);
-});
-
-$router->post('/mes-objets/@id/supprimer', function($id) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->delete((int) $id);
-});
-
-$router->post('/photos/@id/supprimer', function($id) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->deletePhoto((int) $id);
-});
-
-$router->get('/mes-objets/@id/prix/@pourcentage', function($id, $pourcentage) use ($app) {
-    $controller = new ObjetController($app);
-    $controller->parPrix((int) $id, (int) $pourcentage);
-});
-
-$router->get('/echanges', function() use ($app) {
-    $controller = new EchangeController($app);
+$router->get('/villes', function() use ($app) {
+    $controller = new VilleController($app);
     $controller->index();
 });
 
-$router->get('/echanges/proposer/@objetId', function($objetId) use ($app) {
-    $controller = new EchangeController($app);
-    $controller->proposer((int) $objetId);
+$router->get('/villes/create', function() use ($app) {
+    $controller = new VilleController($app);
+    $controller->create();
 });
 
-$router->post('/echanges/proposer/@objetId', function($objetId) use ($app) {
-    $controller = new EchangeController($app);
-    $controller->proposer((int) $objetId);
+$router->post('/villes/store', function() use ($app) {
+    $controller = new VilleController($app);
+    $controller->store();
 });
 
-$router->get('/echanges/@id', function($id) use ($app) {
-    $controller = new EchangeController($app);
-    $controller->detail((int) $id);
+$router->get('/villes/edit/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->edit((int) $id);
 });
 
-$router->post('/echanges/@id/accepter', function($id) use ($app) {
-    $controller = new EchangeController($app);
-    $controller->accepter((int) $id);
+$router->post('/villes/update/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->update((int) $id);
 });
 
-$router->post('/echanges/@id/refuser', function($id) use ($app) {
-    $controller = new EchangeController($app);
-    $controller->refuser((int) $id);
+$router->get('/villes/delete/@id', function($id) use ($app) {
+    $controller = new VilleController($app);
+    $controller->delete((int) $id);
 });
 
-$router->get('/admin/login', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->login();
+/* ===================== ROUTES BESOINS (SEDRA) ===================== */
+
+$router->get('/besoins', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->index();
 });
 
-$router->post('/admin/login', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->login();
+$router->get('/besoins/create', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->create();
 });
 
-$router->get('/admin', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->dashboard();
+$router->post('/besoins/store', function() use ($app) {
+    $controller = new BesoinController($app);
+    $controller->store();
 });
 
-$router->get('/admin/statistiques', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->statistiques();
+$router->get('/besoins/edit/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->edit((int) $id);
 });
 
-$router->get('/admin/categories', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->categoriesIndex();
+$router->post('/besoins/update/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->update((int) $id);
 });
 
-$router->get('/admin/categories/nouveau', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->categoriesCreate();
+$router->get('/besoins/delete/@id', function($id) use ($app) {
+    $controller = new BesoinController($app);
+    $controller->delete((int) $id);
 });
 
-$router->post('/admin/categories/nouveau', function() use ($app) {
-    $controller = new AdminController($app);
-    $controller->categoriesCreate();
+/* ===================== ROUTES DONS (MAHERY) ===================== */
+
+$router->get('/dons', function() use ($app) {
+    $controller = new DonController($app);
+    $controller->index();
 });
 
-$router->get('/admin/categories/@id/modifier', function($id) use ($app) {
-    $controller = new AdminController($app);
-    $controller->categoriesEdit((int) $id);
+$router->get('/dons/create', function() use ($app) {
+    $controller = new DonController($app);
+    $controller->create();
 });
 
-$router->post('/admin/categories/@id/modifier', function($id) use ($app) {
-    $controller = new AdminController($app);
-    $controller->categoriesEdit((int) $id);
+$router->post('/dons/store', function() use ($app) {
+    $controller = new DonController($app);
+    $controller->store();
 });
 
-$router->post('/admin/categories/@id/supprimer', function($id) use ($app) {
-    $controller = new AdminController($app);
-    $controller->categoriesDelete((int) $id);
+$router->get('/dons/edit/@id', function($id) use ($app) {
+    $controller = new DonController($app);
+    $controller->edit((int) $id);
+});
+
+$router->post('/dons/update/@id', function($id) use ($app) {
+    $controller = new DonController($app);
+    $controller->update((int) $id);
+});
+
+$router->get('/dons/delete/@id', function($id) use ($app) {
+    $controller = new DonController($app);
+    $controller->delete((int) $id);
+});
+
+/* ===================== ROUTES SIMULATION (MAHERY) ===================== */
+
+$router->get('/simulation', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->index();
+});
+
+$router->post('/simulation/run', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->run();
+});
+
+$router->post('/simulation/reset', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->reset();
+});
+
+$router->get('/simulation/results', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->results();
+});
+
+/* ===================== ROUTES DASHBOARD (MAHERY) ===================== */
+
+$router->get('/dashboard', function() use ($app) {
+    $controller = new DashboardController($app);
+    $controller->index();
+});
+
+$router->get('/dashboard/ville/@id', function($id) use ($app) {
+    $controller = new DashboardController($app);
+    $controller->villeDetail((int) $id);
 });
