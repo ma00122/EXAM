@@ -12,7 +12,7 @@ SET NAMES utf8mb4;
 SET CHARACTER SET utf8mb4;
 
 -- ============================================================
--- TABLE VILLE (Bolton)
+-- TABLE VILLE (
 -- ============================================================
 CREATE TABLE IF NOT EXISTS ville (
     id INT AUTO_INCREMENT PRIMARY KEY,
