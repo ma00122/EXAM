@@ -44,10 +44,16 @@
                         <ul class="dropdown-menu">
                             <li><a class="dropdown-item" href="/villes"><i class="bi bi-geo-alt"></i> Villes</a></li>
                             <li><a class="dropdown-item" href="/besoins"><i class="bi bi-list-check"></i> Besoins</a></li>
-                            <li><a class="dropdown-item" href="/dons"><i class="bi bi-gift"></i> Dons</a></li>
+                            <li><a class="dropdown-item" href="/dons"><i class="bi bi-gift"></i> Dons Nature</a></li>
+                            <li><a class="dropdown-item" href="/dons-argent"><i class="bi bi-cash-stack"></i> Dons Argent</a></li>
+                            <li><a class="dropdown-item" href="/attributions"><i class="bi bi-arrow-left-right"></i> Attributions</a></li>
+                            <li><a class="dropdown-item" href="/achats"><i class="bi bi-cart-check"></i> Achats</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
+                            <li><a class="dropdown-item" href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
                             <li><a class="dropdown-item" href="/dashboard"><i class="bi bi-speedometer2"></i> Dashboard</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/configuration"><i class="bi bi-gear"></i> Configuration</a></li>
                         </ul>
                     </li>
                     
