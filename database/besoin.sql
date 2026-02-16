@@ -36,4 +36,4 @@ INSERT INTO besoin (ville_id, type_id, produit, quantite, prix_unitaire) VALUES
 (2, 3, 'Donation', 100000, 1),  -- Toamasina, argent
 (3, 2, 'Clou', 300, 1500),      -- Antsirabe, materiaux
 (4, 1, 'Sucre', 150, 3500),     -- Mahajanga, nature
-(5, 3, 'Donation', 50000, 1);   -- Fianarantsoa, argent
+(5, 3, 'Donation', 50000, 1);   -- Fianarantso
