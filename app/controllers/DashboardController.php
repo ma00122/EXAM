@@ -36,7 +36,7 @@ class DashboardController
 
     /**
      * Afficher le tableau de bord principal
-     * GET /bngrc/dashboard
+     * GET /dashboard
      */
     public function index(): void
     {
@@ -53,6 +53,9 @@ class DashboardController
         // Calculer les statistiques par produit (dons)
         $statsParProduit = $this->calculateStatsByProduit();
 
+        // Calculer les statistiques des besoins
+        $statsBesoins = $this->calculateBesoinsStats();
+
         // Enrichir les dons avec les infos d'attribution
         $donsEnrichis = $this->enrichDons($dons);
 
@@ -62,8 +65,75 @@ class DashboardController
             'dons' => $donsEnrichis,
             'statsGlobales' => $statsGlobales,
             'statsParVille' => $statsParVille,
-            'statsParProduit' => $statsParProduit
+            'statsParProduit' => $statsParProduit,
+            'statsBesoins' => $statsBesoins
         ]);
+    }
+
+    /* ===================== STATISTIQUES BESOINS ===================== */
+
+    /**
+     * Calculer les statistiques des besoins (demandé/reçu/restant/couverture)
+     * @return array Statistiques des besoins
+     */
+    private function calculateBesoinsStats(): array
+    {
+        $db = Flight::db();
+        
+        // Récupérer tous les besoins avec type
+        $sql = "SELECT b.*, tb.nom_type as type_nom
+                FROM besoin b
+                LEFT JOIN type_besoin tb ON b.type_id = tb.id
+                ORDER BY b.created_at ASC, b.id ASC";
+        $stmt = $db->query($sql);
+        $besoins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        $stats = [];
+        $totaux = [
+            'quantite_demandee' => 0,
+            'quantite_recue' => 0,
+            'quantite_restante' => 0,
+            'valeur_totale' => 0
+        ];
+        
+        foreach ($besoins as $besoin) {
+            // Quantité reçue = SUM des attributions pour ce besoin
+            $quantiteRecue = $this->attributionModel->getTotalAttribueByBesoin($besoin['id']);
+            $quantiteRestante = max(0, $besoin['quantite'] - $quantiteRecue);
+            $valeurTotale = $besoin['quantite'] * ($besoin['prix_unitaire'] ?? 0);
+            $pourcentageCouverture = $besoin['quantite'] > 0 
+                ? round(($quantiteRecue / $besoin['quantite']) * 100, 2) 
+                : 0;
+            
+            $stats[] = [
+                'id' => $besoin['id'],
+                'type_id' => $besoin['type_id'],
+                'type_nom' => $besoin['type_nom'] ?? 'N/A',
+                'produit' => $besoin['produit'],
+                'quantite_demandee' => $besoin['quantite'],
+                'quantite_recue' => $quantiteRecue,
+                'quantite_restante' => $quantiteRestante,
+                'prix_unitaire' => $besoin['prix_unitaire'] ?? 0,
+                'valeur_totale' => $valeurTotale,
+                'pourcentage_couverture' => $pourcentageCouverture,
+                'created_at' => $besoin['created_at'] ?? 'N/A'
+            ];
+            
+            // Accumuler les totaux
+            $totaux['quantite_demandee'] += $besoin['quantite'];
+            $totaux['quantite_recue'] += $quantiteRecue;
+            $totaux['quantite_restante'] += $quantiteRestante;
+            $totaux['valeur_totale'] += $valeurTotale;
+        }
+        
+        $totaux['pourcentage_global'] = $totaux['quantite_demandee'] > 0
+            ? round(($totaux['quantite_recue'] / $totaux['quantite_demandee']) * 100, 2)
+            : 0;
+        
+        return [
+            'details' => $stats,
+            'totaux' => $totaux
+        ];
     }
 
     /* ===================== STATISTIQUES GLOBALES ===================== */
