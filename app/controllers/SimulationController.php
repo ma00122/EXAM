@@ -3,6 +3,7 @@ namespace app\controllers;
 
 use flight\Engine;
 use app\models\Don;
+use app\models\Besoin;
 use app\models\Attribution;
 use Flight;
 
@@ -11,8 +12,8 @@ use Flight;
  * Projet BNGRC - Module Mahery
  * 
  * ALGORITHME DE SIMULATION :
- * Ce module affiche les statistiques des dons et attributions.
- * La logique de simulation nécessite le module Besoins pour fonctionner complètement.
+ * Ce module attribue les dons aux besoins des villes.
+ * La logique de simulation utilise le module Besoins pour fonctionner.
  */
 class SimulationController
 {
@@ -37,13 +38,19 @@ class SimulationController
     {
         $dons = $this->donModel->getAllDons();
         $attributions = $this->attributionModel->getAllAttributions();
+        
+        // Récupérer les besoins pour la simulation
+        $besoins = Besoin::getAllBesoinsWithDetails();
 
         // Calculer les statistiques
         $stats = $this->calculateStats();
+        $stats['nombre_besoins'] = count($besoins);
+        $stats['total_besoins'] = array_sum(array_column($besoins, 'quantite'));
 
         $this->app->render('simulation/index', [
             'pageTitle' => 'Simulation d\'attribution',
             'dons' => $dons,
+            'besoins' => $besoins,
             'attributions' => $attributions,
             'stats' => $stats,
             'success' => $_SESSION['success'] ?? null,
@@ -56,13 +63,89 @@ class SimulationController
     /* ===================== EXÉCUTER SIMULATION ===================== */
 
     /**
-     * Exécuter l'algorithme de simulation
+     * Exécuter l'algorithme de simulation d'attribution des dons aux besoins
      * POST /simulation/run
-     * NOTE: Nécessite le module Besoins (Sedra) pour fonctionner
+     * 
+     * ALGORITHME :
+     * 1. Récupérer dons ORDER BY date_saisie ASC
+     * 2. Récupérer besoins ORDER BY date_saisie ASC  
+     * 3. Pour chaque don :
+     *    - Chercher besoins même produit
+     *    - Calculer besoin restant
+     *    - attribuer = min(don_restant, besoin_restant)
+     *    - Enregistrer attribution
+     *    - Continuer jusqu'à don épuisé
      */
     public function run(): void
     {
-        $_SESSION['error'] = "La simulation nécessite le module Besoins pour fonctionner. Veuillez intégrer ce module.";
+        // Réinitialiser les attributions existantes
+        $this->attributionModel->deleteAll();
+
+        $db = Flight::db();
+        
+        // 1. Récupérer tous les dons triés par date
+        $dons = $this->donModel->getDonsOrderByDate();
+        
+        // 2. Récupérer tous les besoins triés par date (created_at si date_saisie n'existe pas)
+        $stmt = $db->query("SELECT * FROM besoin ORDER BY created_at ASC, id ASC");
+        $besoins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+        
+        // Tableau pour suivre les quantités restantes
+        $donRestants = [];
+        foreach ($dons as $don) {
+            $donRestants[$don['id']] = $don['quantite'];
+        }
+        
+        $besoinRestants = [];
+        foreach ($besoins as $besoin) {
+            $besoinRestants[$besoin['id']] = $besoin['quantite'];
+        }
+        
+        $attributionsCreees = 0;
+        
+        // 3. Pour chaque don
+        foreach ($dons as $don) {
+            $donId = $don['id'];
+            $produitDon = strtolower(trim($don['type_produit']));
+            
+            // Tant qu'il reste du don à attribuer
+            while ($donRestants[$donId] > 0) {
+                $meilleurBesoin = null;
+                
+                // Chercher le premier besoin correspondant (même produit, avec quantité restante)
+                foreach ($besoins as $besoin) {
+                    $produitBesoin = strtolower(trim($besoin['produit']));
+                    
+                    // Correspondance par produit
+                    if ($produitBesoin === $produitDon && $besoinRestants[$besoin['id']] > 0) {
+                        $meilleurBesoin = $besoin;
+                        break;
+                    }
+                }
+                
+                // Si aucun besoin trouvé, passer au don suivant
+                if (!$meilleurBesoin) {
+                    break;
+                }
+                
+                // Calculer la quantité à attribuer
+                $besoinId = $meilleurBesoin['id'];
+                $quantiteAttribuee = min($donRestants[$donId], $besoinRestants[$besoinId]);
+                
+                // Créer l'attribution
+                if ($quantiteAttribuee > 0) {
+                    $this->attributionModel->createAttribution($donId, $besoinId, $quantiteAttribuee);
+                    
+                    // Mettre à jour les quantités restantes
+                    $donRestants[$donId] -= $quantiteAttribuee;
+                    $besoinRestants[$besoinId] -= $quantiteAttribuee;
+                    
+                    $attributionsCreees++;
+                }
+            }
+        }
+        
+        $_SESSION['success'] = "Simulation terminée avec succès. {$attributionsCreees} attribution(s) créée(s).";
         $this->app->redirect('/simulation');
     }
 
