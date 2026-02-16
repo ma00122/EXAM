@@ -96,21 +96,35 @@
                             <?php endif; ?>
                         </div>
                         <div class="col-md-4 text-end">
+                            <!-- Bouton SIMULER (preview Sedra) -->
+                            <form action="/simulation/simuler" method="POST" class="d-inline">
+                                <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'info' : 'secondary' ?> me-2" 
+                                        <?= !$canSimulate ? 'disabled' : '' ?>>
+                                    <i class="bi bi-eye"></i> Simuler (Preview)
+                                </button>
+                            </form>
+                            
+                            <!-- Bouton exécuter ancien -->
                             <form action="/simulation/run" method="POST" class="d-inline">
                                 <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'primary' : 'secondary' ?> me-2" 
                                         <?= !$canSimulate ? 'disabled' : '' ?>
                                         onclick="return confirm('Exécuter la simulation d\'attribution ?')">
-                                    <i class="bi bi-play-fill"></i> Exécuter la simulation
+                                    <i class="bi bi-play-fill"></i> Exécuter
                                 </button>
                             </form>
                             <?php if ($stats['nombre_attributions'] > 0): ?>
                             <form action="/simulation/reset" method="POST" class="d-inline">
                                 <button type="submit" class="btn btn-lg btn-outline-danger"
                                         onclick="return confirm('Réinitialiser toutes les attributions ?')">
-                                    <i class="bi bi-arrow-counterclockwise"></i> Réinitialiser
+                                    <i class="bi bi-arrow-counterclockwise"></i> Reset
                                 </button>
                             </form>
                             <?php endif; ?>
+                            
+                            <!-- Lien vers récap Ajax -->
+                            <a href="/recap" class="btn btn-lg btn-outline-primary ms-2">
+                                <i class="bi bi-bar-chart"></i> Récap
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -101,6 +101,25 @@ class Don
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     }
 
+    /**
+     * Récupérer les dons par type (nature ou argent)
+     * Module Sedra - Simulation
+     * @param string $type 'nature' ou 'argent'
+     * @return array Liste des dons
+     */
+    public function getDonsByType(string $type): array
+    {
+        if ($type === 'argent') {
+            // Dons argent : type_produit contient "argent" ou montant > 0
+            $sql = "SELECT * FROM don WHERE LOWER(type_produit) LIKE '%argent%' ORDER BY date_saisie ASC";
+        } else {
+            // Dons nature : tout sauf argent
+            $sql = "SELECT * FROM don WHERE LOWER(type_produit) NOT LIKE '%argent%' ORDER BY date_saisie ASC";
+        }
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     /* ===================== UPDATE ===================== */
 
     /**

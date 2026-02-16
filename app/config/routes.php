@@ -164,6 +164,28 @@ $router->get('/simulation/results', function() use ($app) {
     $controller->results();
 });
 
+/* ===================== ROUTES SIMULATION SEDRA ===================== */
+
+$router->post('/simulation/simuler', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->simuler();
+});
+
+$router->post('/simulation/valider', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->valider();
+});
+
+$router->get('/recap/data', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->recapData();
+});
+
+$router->get('/recap', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->recap();
+});
+
 /* ===================== ROUTES DASHBOARD (MAHERY) ===================== */
 
 $router->get('/dashboard', function() use ($app) {
