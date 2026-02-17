@@ -342,3 +342,37 @@ $router->post('/simulation/valider', function() use ($app) {
     $controller = new SimulationController($app);
     $controller->valider();
 });
+
+/* ===================== ROUTES V3 - SIMULATION MULTI-MODE + RESET (BOLTON) ===================== */
+
+$router->post('/simulation/preview', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->previewMode();
+});
+
+$router->get('/simulation/stats', function() use ($app) {
+    $controller = new SimulationController($app);
+    $controller->stats();
+});
+
+/* ===================== ROUTES RESET GLOBAL V3 (BOLTON) ===================== */
+
+$router->post('/reset/global', function() use ($app) {
+    $controller = new \app\controllers\ResetController($app);
+    $controller->resetGlobal();
+});
+
+$router->post('/reset/attributions', function() use ($app) {
+    $controller = new \app\controllers\ResetController($app);
+    $controller->resetAttributions();
+});
+
+$router->post('/reset/achats', function() use ($app) {
+    $controller = new \app\controllers\ResetController($app);
+    $controller->resetAchats();
+});
+
+$router->get('/reset/status', function() use ($app) {
+    $controller = new \app\controllers\ResetController($app);
+    $controller->getStatus();
+});

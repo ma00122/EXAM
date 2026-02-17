@@ -73,15 +73,93 @@
                 </div>
             </div>
 
-            <!-- Actions de simulation -->
+            <!-- ============================================== -->
+            <!-- CHOIX DU MODE DE SIMULATION V3 -->
+            <!-- ============================================== -->
             <?php $canSimulate = !empty($besoins) && !empty($dons); ?>
-            <div class="card mb-4">
+            <?php $selectedMode = $_GET['mode'] ?? 'chronologique'; ?>
+            
+            <div class="card mb-4 border-primary">
                 <div class="card-header bg-primary text-white">
+                    <i class="bi bi-cpu"></i> <strong>Choix du Mode de Simulation</strong>
+                </div>
+                <div class="card-body">
+                    <!-- Menu déroulant de sélection du mode -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <label for="modeSelect" class="form-label fw-bold">
+                                <i class="bi bi-sliders me-2"></i>Sélectionner le mode de simulation :
+                            </label>
+                            <select class="form-select form-select-lg" id="modeSelect" name="mode">
+                                <option value="chronologique" <?= $selectedMode === 'chronologique' ? 'selected' : '' ?>>
+                                    📅 Mode 1: Chronologique (FIFO - par date)
+                                </option>
+                                <option value="croissant" <?= $selectedMode === 'croissant' ? 'selected' : '' ?>>
+                                    📊 Mode 2: Croissant (petits besoins d'abord)
+                                </option>
+                                <option value="proportionnel" <?= $selectedMode === 'proportionnel' ? 'selected' : '' ?>>
+                                    ⚖️ Mode 3: Proportionnel (répartition équitable)
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <!-- Explication du mode sélectionné -->
+                            <div id="modeExplication" class="alert alert-info h-100 mb-0">
+                                <h6 class="alert-heading"><i class="bi bi-info-circle me-2"></i><span id="modeTitre">Mode Chronologique (FIFO)</span></h6>
+                                <p class="mb-1" id="modeDesc">Distribution par ordre de date de saisie. Les besoins enregistrés en premier sont satisfaits en premier.</p>
+                                <hr class="my-2">
+                                <p class="mb-0 small" id="modeExemple"><strong>Exemple RIZ (Don=100):</strong> Tana(30)→Toamasina(50)→Mahajanga(20)→Fianara(0)</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cartes visuelles des 3 modes -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="card h-100 mode-card <?= $selectedMode === 'chronologique' ? 'border-primary bg-light' : '' ?>" 
+                                 data-mode="chronologique" style="cursor: pointer;">
+                                <div class="card-body text-center">
+                                    <div class="fs-1 mb-2">📅</div>
+                                    <h5 class="card-title">Chronologique</h5>
+                                    <p class="card-text small text-muted">Premier arrivé, premier servi (FIFO)</p>
+                                    <span class="badge bg-secondary">Tana=30✓ Toamasina=50✓</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 mode-card <?= $selectedMode === 'croissant' ? 'border-primary bg-light' : '' ?>" 
+                                 data-mode="croissant" style="cursor: pointer;">
+                                <div class="card-body text-center">
+                                    <div class="fs-1 mb-2">📊</div>
+                                    <h5 class="card-title">Croissant</h5>
+                                    <p class="card-text small text-muted">Petits besoins satisfaits d'abord</p>
+                                    <span class="badge bg-success">3 villes complètes</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card h-100 mode-card <?= $selectedMode === 'proportionnel' ? 'border-primary bg-light' : '' ?>" 
+                                 data-mode="proportionnel" style="cursor: pointer;">
+                                <div class="card-body text-center">
+                                    <div class="fs-1 mb-2">⚖️</div>
+                                    <h5 class="card-title">Proportionnel</h5>
+                                    <p class="card-text small text-muted">Répartition équitable selon le poids</p>
+                                    <span class="badge bg-warning text-dark">4 villes partielles</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions de simulation -->
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
                     <i class="bi bi-gear"></i> Actions
                 </div>
                 <div class="card-body">
                     <div class="row align-items-center">
-                        <div class="col-md-8">
+                        <div class="col-md-6">
                             <h5>Algorithme de simulation</h5>
                             <?php if ($canSimulate): ?>
                             <p class="text-success mb-0">
@@ -95,23 +173,26 @@
                             </p>
                             <?php endif; ?>
                         </div>
-                        <div class="col-md-4 text-end">
-                            <!-- Bouton SIMULER (preview Sedra) -->
-                            <form action="/simulation/simuler" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'info' : 'secondary' ?> me-2" 
+                        <div class="col-md-6 text-end">
+                            <!-- Bouton PRÉVISUALISER avec mode -->
+                            <form action="/simulation/preview" method="POST" class="d-inline" id="formPreview">
+                                <input type="hidden" name="mode" id="hiddenModePreview" value="<?= htmlspecialchars($selectedMode) ?>">
+                                <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'info' : 'secondary' ?>" 
                                         <?= !$canSimulate ? 'disabled' : '' ?>>
-                                    <i class="bi bi-eye"></i> Simuler (Preview)
+                                    <i class="bi bi-eye"></i> Prévisualiser
                                 </button>
                             </form>
                             
-                            <!-- Bouton exécuter ancien -->
-                            <form action="/simulation/run" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'primary' : 'secondary' ?> me-2" 
+                            <!-- Bouton EXÉCUTER avec mode -->
+                            <form action="/simulation/run" method="POST" class="d-inline" id="formRun">
+                                <input type="hidden" name="mode" id="hiddenModeRun" value="<?= htmlspecialchars($selectedMode) ?>">
+                                <button type="submit" class="btn btn-lg btn-<?= $canSimulate ? 'primary' : 'secondary' ?>" 
                                         <?= !$canSimulate ? 'disabled' : '' ?>
-                                        onclick="return confirm('Exécuter la simulation d\'attribution ?')">
+                                        onclick="return confirm('Exécuter la simulation en mode ' + document.getElementById('modeSelect').value + ' ?')">
                                     <i class="bi bi-play-fill"></i> Exécuter
                                 </button>
                             </form>
+                            
                             <?php if ($stats['nombre_attributions'] > 0): ?>
                             <form action="/simulation/reset" method="POST" class="d-inline">
                                 <button type="submit" class="btn btn-lg btn-outline-danger"
@@ -121,7 +202,6 @@
                             </form>
                             <?php endif; ?>
                             
-                            <!-- Lien vers récap Ajax -->
                             <a href="/recap" class="btn btn-lg btn-outline-primary ms-2">
                                 <i class="bi bi-bar-chart"></i> Récap
                             </a>
@@ -280,17 +360,93 @@
                 </div>
                 <div class="card-body">
                     <ol class="mb-0">
-                        <li>Les <strong>dons</strong> sont triés par date de saisie (du plus ancien au plus récent)</li>
-                        <li>Les <strong>besoins</strong> sont également triés par date de création</li>
-                        <li>Pour chaque don, l'algorithme recherche les besoins correspondants (<strong>même produit</strong>)</li>
+                        <li><strong>Mode Chronologique:</strong> Les dons et besoins sont triés par date de saisie (FIFO)</li>
+                        <li><strong>Mode Croissant:</strong> Les besoins les plus petits sont satisfaits en premier</li>
+                        <li><strong>Mode Proportionnel:</strong> Chaque ville reçoit une part proportionnelle à son besoin</li>
                         <li>La quantité attribuée = <code>min(don disponible, besoin restant)</code></li>
                         <li>L'attribution est enregistrée et les quantités sont mises à jour</li>
-                        <li>Le processus continue jusqu'à épuisement du don ou des besoins</li>
                     </ol>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Script de synchronisation mode -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const modeSelect = document.getElementById('modeSelect');
+    const modeCards = document.querySelectorAll('.mode-card');
+    const hiddenModePreview = document.getElementById('hiddenModePreview');
+    const hiddenModeRun = document.getElementById('hiddenModeRun');
+    
+    // Explications des modes
+    const modes = {
+        chronologique: {
+            titre: 'Mode Chronologique (FIFO)',
+            desc: 'Distribution par ordre de date de saisie. Les besoins enregistrés en premier sont satisfaits en premier.',
+            exemple: '<strong>Exemple RIZ (Don=100):</strong> Tana=30✓, Toamasina=50✓, Mahajanga=20/40⚠️, Fianara=0/20❌'
+        },
+        croissant: {
+            titre: 'Mode Croissant (Petits d\'abord)',
+            desc: 'Priorité aux villes avec les plus petits besoins. Permet de satisfaire complètement plus de villes.',
+            exemple: '<strong>Exemple RIZ (Don=100):</strong> Fianara=20✓, Tana=30✓, Mahajanga=40✓, Toamasina=10/50⚠️'
+        },
+        proportionnel: {
+            titre: 'Mode Proportionnel (Équitable)',
+            desc: 'Répartition selon le poids des besoins. Formule: part = (besoin_ville / total) × don. Arrondi vers le bas.',
+            exemple: '<strong>Exemple RIZ (Don=100):</strong> Tana=21, Toamasina=36, Mahajanga=29, Fianara=14 (tous partiels)'
+        }
+    };
+    
+    function updateExplication(mode) {
+        const m = modes[mode];
+        document.getElementById('modeTitre').textContent = m.titre;
+        document.getElementById('modeDesc').textContent = m.desc;
+        document.getElementById('modeExemple').innerHTML = m.exemple;
+    }
+    
+    function selectMode(mode) {
+        // Mettre à jour le select
+        modeSelect.value = mode;
+        
+        // Mettre à jour les champs cachés
+        if (hiddenModePreview) hiddenModePreview.value = mode;
+        if (hiddenModeRun) hiddenModeRun.value = mode;
+        
+        // Mettre à jour les cartes visuellement
+        modeCards.forEach(card => {
+            if (card.dataset.mode === mode) {
+                card.classList.add('border-primary', 'bg-light');
+            } else {
+                card.classList.remove('border-primary', 'bg-light');
+            }
+        });
+        
+        // Mettre à jour l'explication
+        updateExplication(mode);
+        
+        // Mettre à jour l'URL sans recharger
+        const url = new URL(window.location);
+        url.searchParams.set('mode', mode);
+        window.history.replaceState({}, '', url);
+    }
+    
+    // Événement sur le menu déroulant
+    modeSelect.addEventListener('change', function() {
+        selectMode(this.value);
+    });
+    
+    // Événement sur les cartes
+    modeCards.forEach(card => {
+        card.addEventListener('click', function() {
+            selectMode(this.dataset.mode);
+        });
+    });
+    
+    // Initialiser avec le mode actuel
+    updateExplication(modeSelect.value);
+});
+</script>
 
 <?php include __DIR__ . '/../layout/footer.php'; ?>

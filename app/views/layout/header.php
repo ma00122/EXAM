@@ -60,7 +60,12 @@
                             <i class="bi bi-bar-chart"></i> Analyse
                         </a>
                         <ul class="dropdown-menu">
-                            <li><a class="dropdown-item" href="/simulation"><i class="bi bi-play-circle"></i> Simulation</a></li>
+                            <li><h6 class="dropdown-header"><i class="bi bi-cpu"></i> Modes de Simulation</h6></li>
+                            <li><a class="dropdown-item" href="/simulation?mode=chronologique">📅 Chronologique (FIFO)</a></li>
+                            <li><a class="dropdown-item" href="/simulation?mode=croissant">📊 Croissant (petits d'abord)</a></li>
+                            <li><a class="dropdown-item" href="/simulation?mode=proportionnel">⚖️ Proportionnel (équitable)</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/simulation"><i class="bi bi-play-circle"></i> Simulation (général)</a></li>
                             <li><a class="dropdown-item" href="/besoins/restants"><i class="bi bi-exclamation-triangle"></i> Besoins Restants</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="/recap"><i class="bi bi-clipboard-data"></i> Récapitulatif</a></li>
