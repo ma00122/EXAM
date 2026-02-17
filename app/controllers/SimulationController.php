@@ -801,18 +801,42 @@ class SimulationController
     /* ===================== RÉINITIALISER ===================== */
 
     /**
-     * Réinitialiser toutes les attributions
+     * Réinitialiser toutes les attributions et restaurer les quantités
      * POST /simulation/reset
      */
     public function reset(): void
     {
-        $count = $this->attributionModel->countAttributions();
-        $result = $this->attributionModel->deleteAll();
-
-        if ($result) {
-            $_SESSION['success'] = "Simulation réinitialisée. {$count} attribution(s) supprimée(s).";
-        } else {
-            $_SESSION['error'] = "Erreur lors de la réinitialisation.";
+        $db = Flight::db();
+        
+        try {
+            $db->runQuery("START TRANSACTION");
+            
+            // Compter avant suppression
+            $nbAttributions = $db->fetchRow("SELECT COUNT(*) as total FROM attribution")['total'] ?? 0;
+            $nbAchats = $db->fetchRow("SELECT COUNT(*) as total FROM achat")['total'] ?? 0;
+            
+            // 1. Supprimer toutes les attributions
+            $db->runQuery("DELETE FROM attribution");
+            
+            // 2. Supprimer tous les achats
+            $db->runQuery("DELETE FROM achat");
+            
+            // 3. Restaurer les quantités initiales des dons
+            $db->runQuery("UPDATE don SET quantite = quantite_initiale");
+            
+            // 4. Restaurer les quantités initiales des besoins
+            $db->runQuery("UPDATE besoin SET quantite_satisfaite = 0");
+            
+            // 5. Restaurer les dons argent
+            $db->runQuery("UPDATE don_argent SET montant_utilise = 0, statut = 'disponible'");
+            
+            $db->runQuery("COMMIT");
+            
+            $_SESSION['success'] = "Reset effectué: {$nbAttributions} attribution(s) et {$nbAchats} achat(s) supprimés. Quantités restaurées.";
+            
+        } catch (\Exception $e) {
+            $db->runQuery("ROLLBACK");
+            $_SESSION['error'] = "Erreur lors du reset: " . $e->getMessage();
         }
 
         $this->app->redirect('/simulation');
@@ -1266,6 +1290,8 @@ class SimulationController
     {
         $db = Flight::db();
         
+        $nbAttributions = $db->fetchRow("SELECT COUNT(*) as total FROM attribution")['total'] ?? 0;
+        
         $stats = [
             'dons' => $db->fetchAll("
                 SELECT type_produit, 
@@ -1280,7 +1306,8 @@ class SimulationController
                        SUM(quantite - quantite_satisfaite) as restant
                 FROM besoin GROUP BY produit
             "),
-            'attributions' => $db->fetchRow("SELECT COUNT(*) as total FROM attribution")['total'] ?? 0,
+            'attributions' => $nbAttributions,
+            'nombre_attributions' => $nbAttributions,
             'achats' => [
                 'total' => $db->fetchRow("SELECT COUNT(*) as total FROM achat")['total'] ?? 0,
                 'montant' => $db->fetchRow("SELECT COALESCE(SUM(montant_total), 0) as montant FROM achat WHERE statut = 'valide'")['montant'] ?? 0

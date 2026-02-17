@@ -31,9 +31,10 @@ class DonArgent
     {
         $dateSaisie = $dateSaisie ?? date('Y-m-d');
         
-        $sql = "INSERT INTO don_argent (montant, donateur, date_saisie, notes) VALUES (?, ?, ?, ?)";
+        // Store montant_initial equal to montant for reset purposes
+        $sql = "INSERT INTO don_argent (montant, montant_initial, donateur, date_saisie, notes) VALUES (?, ?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([$montant, $donateur, $dateSaisie, $notes]);
+        $result = $stmt->execute([$montant, $montant, $donateur, $dateSaisie, $notes]);
         
         if ($result) {
             return (int) $this->db->lastInsertId();

@@ -194,8 +194,8 @@
                             </form>
                             
                             <!-- Bouton RESET toujours visible -->
-                            <form action="/simulation/reset" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-lg btn-<?= ($stats['nombre_attributions'] > 0) ? 'danger' : 'outline-secondary' ?>"
+                            <form action="/simulation/reset" method="POST" class="d-inline" id="formReset">
+                                <button type="submit" id="btnReset" class="btn btn-lg btn-<?= ($stats['nombre_attributions'] > 0) ? 'danger' : 'outline-secondary' ?>"
                                         <?= ($stats['nombre_attributions'] == 0) ? 'disabled' : '' ?>
                                         onclick="return confirm('Réinitialiser toutes les attributions et restaurer les quantités initiales ?')">
                                     <i class="bi bi-arrow-counterclockwise"></i> Reset
@@ -446,6 +446,31 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Initialiser avec le mode actuel
     updateExplication(modeSelect.value);
+    
+    // Fonction pour mettre à jour le bouton Reset via AJAX
+    function updateResetButton() {
+        fetch('/simulation/stats')
+            .then(response => response.json())
+            .then(data => {
+                const btnReset = document.getElementById('btnReset');
+                if (btnReset && data.success) {
+                    const nbAttributions = data.stats?.nombre_attributions || 0;
+                    if (nbAttributions > 0) {
+                        btnReset.classList.remove('btn-outline-secondary');
+                        btnReset.classList.add('btn-danger');
+                        btnReset.disabled = false;
+                    } else {
+                        btnReset.classList.remove('btn-danger');
+                        btnReset.classList.add('btn-outline-secondary');
+                        btnReset.disabled = true;
+                    }
+                }
+            })
+            .catch(err => console.log('Stats update error:', err));
+    }
+    
+    // Rafraîchir le bouton Reset après chargement de la page
+    updateResetButton();
 });
 </script>
 

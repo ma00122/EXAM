@@ -411,12 +411,15 @@ class Besoin extends ActiveRecord
         }
 
         $db = \Flight::db();
-        $stmt = $db->prepare("INSERT INTO besoin (ville_id, type_id, produit, quantite, prix_unitaire) VALUES (?, ?, ?, ?, ?)");
+        // V3: quantite_initiale = quantite lors de l'insertion
+        $quantite = (int) $data['quantite'];
+        $stmt = $db->prepare("INSERT INTO besoin (ville_id, type_id, produit, quantite, quantite_initiale, prix_unitaire) VALUES (?, ?, ?, ?, ?, ?)");
         return $stmt->execute([
             (int) $data['ville_id'],
             (int) $data['type_id'],
             trim($data['produit']),
-            (int) $data['quantite'],
+            $quantite,
+            $quantite,  // quantite_initiale = quantite
             (float) $data['prix_unitaire']
         ]);
     }
