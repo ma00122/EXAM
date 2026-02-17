@@ -30,9 +30,10 @@ class Don
     {
         $dateSaisie = $dateSaisie ?? date('Y-m-d');
         
-        $sql = "INSERT INTO don (type_produit, quantite, date_saisie) VALUES (?, ?, ?)";
+        // V3: quantite_initiale = quantite lors de l'insertion
+        $sql = "INSERT INTO don (type_produit, quantite, quantite_initiale, date_saisie) VALUES (?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([$typeProduit, $quantite, $dateSaisie]);
+        $result = $stmt->execute([$typeProduit, $quantite, $quantite, $dateSaisie]);
         
         if ($result) {
             return (int) $this->db->lastInsertId();
