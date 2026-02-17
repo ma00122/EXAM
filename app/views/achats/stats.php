@@ -12,7 +12,7 @@
     <div class="row mb-4">
         <?php foreach ($countByStatut as $stat): ?>
             <?php
-            $bgClass = match($stat['statut']) {
+            $bgClass = match($stat['statut'] ?? 'en_attente') {
                 'valide' => 'bg-success',
                 'annule' => 'bg-danger',
                 default => 'bg-warning'
@@ -21,9 +21,9 @@
             <div class="col-md-4">
                 <div class="card <?= $bgClass ?> text-white">
                     <div class="card-body text-center">
-                        <h2><?= $stat['nombre'] ?></h2>
-                        <p class="mb-0">Achats <?= ucfirst($stat['statut']) ?></p>
-                        <small><?= number_format($stat['total'], 0, ',', ' ') ?> Ar</small>
+                        <h2><?= $stat['nombre'] ?? 0 ?></h2>
+                        <p class="mb-0">Achats <?= ucfirst($stat['statut'] ?? 'En attente') ?></p>
+                        <small><?= number_format($stat['total'] ?? 0, 0, ',', ' ') ?> Ar</small>
                     </div>
                 </div>
             </div>
@@ -62,7 +62,7 @@
                         ?>
                             <tr>
                                 <td><strong><?= htmlspecialchars($stat['ville_nom']) ?></strong></td>
-                                <td><?= htmlspecialchars($stat['region']) ?></td>
+                                <td><?= htmlspecialchars($stat['region'] ?? '') ?></td>
                                 <td><span class="badge bg-primary"><?= $stat['nombre_achats'] ?></span></td>
                                 <td><?= number_format($stat['total_montant_produit'], 0, ',', ' ') ?> Ar</td>
                                 <td class="text-warning"><?= number_format($stat['total_frais'], 0, ',', ' ') ?> Ar</td>

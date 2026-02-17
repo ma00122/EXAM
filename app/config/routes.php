@@ -272,6 +272,21 @@ $router->get('/achats/delete/@id', function($id) use ($app) {
     $controller->delete((int) $id);
 });
 
+$router->get('/achats/stats', function() use ($app) {
+    $controller = new \app\controllers\AchatController($app);
+    $controller->stats();
+});
+
+$router->get('/achats/validate/@id', function($id) use ($app) {
+    $controller = new \app\controllers\AchatController($app);
+    $controller->validate((int) $id);
+});
+
+$router->get('/achats/cancel/@id', function($id) use ($app) {
+    $controller = new \app\controllers\AchatController($app);
+    $controller->cancel((int) $id);
+});
+
 /* ===================== ROUTES CONFIGURATION (MAHERY) ===================== */
 
 $router->get('/configuration', function() use ($app) {

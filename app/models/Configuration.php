@@ -125,6 +125,39 @@ class Configuration
     }
 
     /**
+     * Alias pour getConfig
+     * @param string $cle Clé de configuration
+     * @param string|null $default Valeur par défaut
+     * @return string|null Valeur de configuration
+     */
+    public function get(string $cle, ?string $default = null): ?string
+    {
+        return $this->getConfig($cle, $default);
+    }
+
+    /**
+     * Alias pour deleteConfig
+     * @param string $cle Clé de configuration
+     * @return bool Succès de la suppression
+     */
+    public function delete(string $cle): bool
+    {
+        return $this->deleteConfig($cle);
+    }
+
+    /**
+     * Créer une nouvelle configuration (alias pour setConfig avec description)
+     * @param string $cle Clé de configuration
+     * @param string $valeur Valeur de configuration
+     * @param string|null $description Description optionnelle
+     * @return bool Succès de l'opération
+     */
+    public function create(string $cle, string $valeur, ?string $description = null): bool
+    {
+        return $this->setConfig($cle, $valeur, $description);
+    }
+
+    /**
      * Calculer les frais d'achat pour un montant donné
      * @param float $montantProduit Montant du produit
      * @return array Montant avec frais

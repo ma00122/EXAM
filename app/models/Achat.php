@@ -97,6 +97,7 @@ class Achat
     {
         $sql = "SELECT a.*, 
                        v.nom as ville_nom, 
+                       v.region as region,
                        b.produit as besoin_produit,
                        b.prix_unitaire,
                        d.type_produit as don_type
@@ -118,6 +119,7 @@ class Achat
     {
         $sql = "SELECT a.*, 
                        v.nom as ville_nom, 
+                       v.region as region,
                        b.produit as besoin_produit,
                        b.prix_unitaire,
                        d.type_produit as don_type
@@ -141,6 +143,7 @@ class Achat
     {
         $sql = "SELECT a.*, 
                        v.nom as ville_nom, 
+                       v.region as region,
                        b.produit as besoin_produit,
                        b.prix_unitaire,
                        d.type_produit as don_type
@@ -163,6 +166,7 @@ class Achat
     {
         $sql = "SELECT a.*, 
                        v.nom as ville_nom, 
+                       v.region as region,
                        b.produit as besoin_produit
                 FROM achat a
                 JOIN ville v ON a.ville_id = v.id
@@ -276,6 +280,7 @@ class Achat
     {
         $sql = "SELECT a.*, 
                        v.nom as ville_nom, 
+                       v.region as region,
                        b.produit as besoin_produit
                 FROM achat a
                 JOIN ville v ON a.ville_id = v.id
@@ -397,23 +402,37 @@ class Achat
     public function getStatsByVille(): array
     {
         $sql = "SELECT v.nom as ville_nom, 
+                       v.region as region,
                        COUNT(*) as nombre_achats,
-                       COALESCE(SUM(a.montant_total), 0) as montant_total
+                       COALESCE(SUM(a.montant_produit), 0) as total_montant_produit,
+                       COALESCE(SUM(a.frais), 0) as total_frais,
+                       COALESCE(SUM(a.montant_total), 0) as total_general
                 FROM achat a
                 JOIN ville v ON a.ville_id = v.id
-                GROUP BY v.id, v.nom
-                ORDER BY montant_total DESC";
+                GROUP BY v.id, v.nom, v.region
+                ORDER BY total_general DESC";
         $stmt = $this->db->query($sql);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
     /**
-     * Récupérer le nombre d'achats par statut
+     * Récupérer le nombre d'achats par statut avec montants
      */
     public function getCountByStatut(): array
     {
-        $sql = "SELECT statut, COUNT(*) as count FROM achat GROUP BY statut";
+        $sql = "SELECT statut, 
+                       COUNT(*) as nombre, 
+                       COALESCE(SUM(montant_total), 0) as total 
+                FROM achat 
+                GROUP BY statut
+                ORDER BY 
+                    CASE statut 
+                        WHEN 'valide' THEN 1 
+                        WHEN 'en_attente' THEN 2 
+                        WHEN 'annule' THEN 3 
+                        ELSE 4 
+                    END";
         $stmt = $this->db->query($sql);
-        return $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

@@ -166,7 +166,9 @@
                             <tr>
                                 <td>
                                     <strong><?= htmlspecialchars($besoin['ville_nom']) ?></strong>
+                                    <?php if (!empty($besoin['region'])): ?>
                                     <br><small class="text-muted"><?= htmlspecialchars($besoin['region']) ?></small>
+                                    <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($besoin['produit']) ?></td>
                                 <td><?= number_format($besoin['quantite_demandee'], 0, ',', ' ') ?></td>

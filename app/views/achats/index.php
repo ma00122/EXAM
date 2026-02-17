@@ -128,7 +128,9 @@
                                 <td><?= $achat['id'] ?></td>
                                 <td>
                                     <strong><?= htmlspecialchars($achat['ville_nom']) ?></strong>
+                                    <?php if (!empty($achat['region'])): ?>
                                     <br><small class="text-muted"><?= htmlspecialchars($achat['region']) ?></small>
+                                    <?php endif; ?>
                                 </td>
                                 <td><?= htmlspecialchars($achat['besoin_produit']) ?></td>
                                 <td><?= $achat['quantite_achetee'] ?></td>
