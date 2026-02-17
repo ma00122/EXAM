@@ -90,6 +90,9 @@ class SimulationController
         
         // Frais configuré
         $fraisPourcentage = $this->getFraisPourcentage();
+        
+        // Mode sélectionné (depuis URL ou défaut)
+        $selectedMode = $_GET['mode'] ?? 'chronologique';
 
         $this->app->render('simulation/index', [
             'pageTitle' => 'Simulation V3 - Multi-Mode',
@@ -101,6 +104,7 @@ class SimulationController
             'stats' => $stats,
             'donsArgent' => $donsArgent ?? [],
             'fraisPourcentage' => $fraisPourcentage,
+            'selectedMode' => $selectedMode,
             'success' => $_SESSION['success'] ?? null,
             'error' => $_SESSION['error'] ?? null
         ]);
