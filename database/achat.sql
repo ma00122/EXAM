@@ -1,5 +1,3 @@
--- Table des achats effectués avec dons argent
--- Projet BNGRC - Module Sedra
 
 CREATE TABLE IF NOT EXISTS achat (
     id INT AUTO_INCREMENT PRIMARY KEY,
