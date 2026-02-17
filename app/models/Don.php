@@ -30,9 +30,10 @@ class Don
     {
         $dateSaisie = $dateSaisie ?? date('Y-m-d');
         
-        $sql = "INSERT INTO don (type_produit, quantite, date_saisie) VALUES (?, ?, ?)";
+        // V3: quantite_initiale = quantite lors de l'insertion
+        $sql = "INSERT INTO don (type_produit, quantite, quantite_initiale, date_saisie) VALUES (?, ?, ?, ?)";
         $stmt = $this->db->prepare($sql);
-        $result = $stmt->execute([$typeProduit, $quantite, $dateSaisie]);
+        $result = $stmt->execute([$typeProduit, $quantite, $quantite, $dateSaisie]);
         
         if ($result) {
             return (int) $this->db->lastInsertId();
@@ -233,5 +234,54 @@ class Don
         $attribuee = (int) $stmt->fetch(PDO::FETCH_COLUMN);
 
         return max(0, $don['quantite'] - $attribuee);
+    }
+
+    /* ===================== V3 - RESET FUNCTIONS ===================== */
+
+    /**
+     * V3: Insérer un don avec quantite_initiale
+     */
+    public function insertDonV3(string $typeProduit, int $quantite, ?string $dateSaisie = null): int|false
+    {
+        $dateSaisie = $dateSaisie ?? date('Y-m-d');
+        
+        $sql = "INSERT INTO don (type_produit, quantite, quantite_initiale, date_saisie) VALUES (?, ?, ?, ?)";
+        $stmt = $this->db->prepare($sql);
+        $result = $stmt->execute([$typeProduit, $quantite, $quantite, $dateSaisie]);
+        
+        if ($result) {
+            return (int) $this->db->lastInsertId();
+        }
+        return false;
+    }
+
+    /**
+     * V3: Restaurer tous les dons à leur quantité initiale
+     */
+    public function resetAllDons(): bool
+    {
+        $sql = "UPDATE don SET quantite = quantite_initiale";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute();
+    }
+
+    /**
+     * V3: Récupérer les dons avec leur état initial
+     */
+    public function getDonsWithInitial(): array
+    {
+        $sql = "SELECT *, (quantite_initiale - quantite) as quantite_utilisee FROM don ORDER BY date_saisie ASC";
+        $stmt = $this->db->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * V3: Diminuer la quantité d'un don
+     */
+    public function diminuerQuantite(int $id, int $quantite): bool
+    {
+        $sql = "UPDATE don SET quantite = quantite - ? WHERE id = ? AND quantite >= ?";
+        $stmt = $this->db->prepare($sql);
+        return $stmt->execute([$quantite, $id, $quantite]);
     }
 }

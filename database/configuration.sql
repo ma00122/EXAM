@@ -1,6 +1,7 @@
 -- Table de configuration (frais d'achat, etc.)
 -- Projet BNGRC - Module Sedra
 
+
 CREATE TABLE IF NOT EXISTS configuration (
     id INT AUTO_INCREMENT PRIMARY KEY,
     cle VARCHAR(100) NOT NULL UNIQUE,

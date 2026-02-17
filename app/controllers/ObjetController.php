@@ -18,12 +18,9 @@ class ObjetController
 
     public function accueil(): void
     {
-        // Provide minimal variables expected by the view to avoid runtime errors
+        // Page d'accueil BNGRC
         $this->app->render('objets/accueil', [
-            'pageTitle' => 'Accueil',
-            'categories' => [],
-            'objets' => [],
-            'e' => fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8'),
+            'pageTitle' => 'Accueil BNGRC',
         ]);
     }
 
