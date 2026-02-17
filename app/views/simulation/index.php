@@ -193,14 +193,14 @@
                                 </button>
                             </form>
                             
-                            <?php if ($stats['nombre_attributions'] > 0): ?>
+                            <!-- Bouton RESET toujours visible -->
                             <form action="/simulation/reset" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-lg btn-outline-danger"
-                                        onclick="return confirm('Réinitialiser toutes les attributions ?')">
+                                <button type="submit" class="btn btn-lg btn-<?= ($stats['nombre_attributions'] > 0) ? 'danger' : 'outline-secondary' ?>"
+                                        <?= ($stats['nombre_attributions'] == 0) ? 'disabled' : '' ?>
+                                        onclick="return confirm('Réinitialiser toutes les attributions et restaurer les quantités initiales ?')">
                                     <i class="bi bi-arrow-counterclockwise"></i> Reset
                                 </button>
                             </form>
-                            <?php endif; ?>
                             
                             <a href="/recap" class="btn btn-lg btn-outline-primary ms-2">
                                 <i class="bi bi-bar-chart"></i> Récap

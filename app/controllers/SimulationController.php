@@ -113,25 +113,75 @@ class SimulationController
     /**
      * Preview de la simulation selon le mode choisi
      * POST /simulation/preview
-     * Retourne JSON avec les attributions calculées
+     * Affiche une page HTML avec les résultats prévisionnels
      */
     public function previewMode(): void
     {
         $mode = Flight::request()->data->mode ?? 'chronologique';
-        $produit = Flight::request()->data->produit ?? null;
+        
+        // Valider le mode
+        if (!in_array($mode, ['chronologique', 'croissant', 'proportionnel'])) {
+            $mode = 'chronologique';
+        }
         
         $db = Flight::db();
         
-        // Si produit spécifique
-        if ($produit) {
-            $result = $this->previewProduit($produit, $mode);
-            Flight::json($result);
-            return;
+        // Récupérer tous les produits avec dons disponibles
+        $produits = $db->fetchAll("SELECT DISTINCT type_produit FROM don WHERE quantite > 0");
+        
+        $resultatsGlobaux = [];
+        $statsGlobales = [
+            'total_distribue' => 0,
+            'total_besoins' => 0,
+            'total_dons' => 0,
+            'villes_satisfaites' => 0
+        ];
+        
+        foreach ($produits as $p) {
+            $produit = $p['type_produit'];
+            
+            $dons = $db->fetchAll("
+                SELECT * FROM don WHERE type_produit = ? AND quantite > 0 ORDER BY date_saisie ASC
+            ", [$produit]);
+            
+            $besoins = $db->fetchAll("
+                SELECT b.*, v.nom as ville_nom, v.region,
+                       (b.quantite - b.quantite_satisfaite) as quantite_restante
+                FROM besoin b
+                JOIN ville v ON b.ville_id = v.id
+                WHERE b.produit = ? AND b.quantite > b.quantite_satisfaite
+                ORDER BY b.date_saisie ASC
+            ", [$produit]);
+            
+            if (!empty($dons) && !empty($besoins)) {
+                $resultat = $this->calculerSimulation($dons, $besoins, $mode);
+                $resultatsGlobaux[$produit] = $resultat;
+                
+                $statsGlobales['total_distribue'] += $resultat['statistiques']['total_distribue'];
+                $statsGlobales['total_besoins'] += $resultat['statistiques']['total_besoins'];
+                $statsGlobales['total_dons'] += $resultat['statistiques']['total_don'];
+                $statsGlobales['villes_satisfaites'] += $resultat['statistiques']['villes_completes'];
+            }
         }
         
-        // Sinon preview global
-        $result = $this->previewGlobal($mode);
-        Flight::json($result);
+        $statsGlobales['taux_satisfaction'] = $statsGlobales['total_besoins'] > 0 
+            ? round(($statsGlobales['total_distribue'] / $statsGlobales['total_besoins']) * 100, 2) 
+            : 0;
+        
+        $modeLabels = [
+            'chronologique' => 'Chronologique (FIFO)',
+            'croissant' => 'Croissant (petits d\'abord)',
+            'proportionnel' => 'Proportionnel (équitable)'
+        ];
+        
+        // Afficher la page de prévisualisation
+        $this->app->render('simulation/preview', [
+            'pageTitle' => 'Prévisualisation - Mode ' . $modeLabels[$mode],
+            'mode' => $mode,
+            'modeLabel' => $modeLabels[$mode],
+            'resultats' => $resultatsGlobaux,
+            'statsGlobales' => $statsGlobales
+        ]);
     }
     
     /**
@@ -345,7 +395,7 @@ class SimulationController
     private function simulationProportionnel(array $dons, array $besoins): array
     {
         $attributions = [];
-        $details = ["=== MODE PROPORTIONNEL ==="];
+        $details = ["=== MODE PROPORTIONNEL (répartition par partie décimale) ==="];
         
         $totalDonDisponible = array_sum(array_column($dons, 'quantite'));
         $totalBesoins = array_sum(array_column($besoins, 'quantite_restante'));
@@ -355,53 +405,72 @@ class SimulationController
         $details[] = "";
         $details[] = "Calcul des proportions:";
         
-        // Première passe: calcul proportionnel avec floor
+        // Première passe: calcul proportionnel avec floor + garder la partie décimale
         $distribue = 0;
-        foreach ($besoins as &$besoin) {
+        foreach ($besoins as $key => &$besoin) {
             $quantiteRestante = (int)$besoin['quantite_restante'];
             $proportion = $totalBesoins > 0 ? $quantiteRestante / $totalBesoins : 0;
-            $part = (int)floor($totalDonDisponible * $proportion);
+            $partExacte = $totalDonDisponible * $proportion;
+            $partEntiere = (int)floor($partExacte);
+            $partDecimale = $partExacte - $partEntiere;
             
             // Ne pas dépasser le besoin
-            $part = min($part, $quantiteRestante);
+            $partEntiere = min($partEntiere, $quantiteRestante);
             
-            $besoin['part_calculee'] = $part;
-            $distribue += $part;
+            $besoin['part_calculee'] = $partEntiere;
+            $besoin['part_decimale'] = $partDecimale;
+            $besoin['key'] = $key;
+            $distribue += $partEntiere;
             
             $details[] = "  {$besoin['ville_nom']}: $quantiteRestante/$totalBesoins = " . 
                         number_format($proportion, 4) . " × $totalDonDisponible = " . 
-                        number_format($totalDonDisponible * $proportion, 2) . " → floor = $part";
+                        number_format($partExacte, 2) . " → floor = $partEntiere (décimale: " . 
+                        number_format($partDecimale, 4) . ")";
         }
+        unset($besoin);
         
         // Calculer le reste
         $reste = $totalDonDisponible - $distribue;
         $details[] = "";
         $details[] = "Total distribué (1ère passe): $distribue, Reste à redistribuer: $reste";
         
-        // Redistribuer le reste aux besoins non satisfaits (plus grand besoin restant d'abord)
+        // Redistribuer le reste par ordre de partie décimale DÉCROISSANTE (plus grande décimale d'abord)
         if ($reste > 0) {
             $details[] = "";
-            $details[] = "Redistribution du reste ($reste unités):";
+            $details[] = "Redistribution du reste ($reste unités) par partie décimale décroissante:";
             
-            // Trier par besoin restant non satisfait (décroissant)
-            usort($besoins, function($a, $b) {
-                $resteA = (int)$a['quantite_restante'] - (int)$a['part_calculee'];
-                $resteB = (int)$b['quantite_restante'] - (int)$b['part_calculee'];
-                return $resteB - $resteA;
+            // Créer une copie pour trier par partie décimale décroissante
+            $besoinsParDecimale = $besoins;
+            usort($besoinsParDecimale, function($a, $b) {
+                // Trier par partie décimale décroissante
+                $diff = $b['part_decimale'] - $a['part_decimale'];
+                if (abs($diff) < 0.0001) return 0;
+                return $diff > 0 ? 1 : -1;
             });
             
-            foreach ($besoins as &$besoin) {
+            foreach ($besoinsParDecimale as $besoinTri) {
                 if ($reste <= 0) break;
                 
-                $besoinRestant = (int)$besoin['quantite_restante'] - (int)$besoin['part_calculee'];
-                if ($besoinRestant > 0) {
-                    $ajout = min(1, $reste, $besoinRestant);
-                    $besoin['part_calculee'] += $ajout;
-                    $reste -= $ajout;
-                    $details[] = "  +$ajout à {$besoin['ville_nom']} → total: {$besoin['part_calculee']}";
+                // Trouver le besoin original dans le tableau
+                foreach ($besoins as &$besoin) {
+                    if ($besoin['id'] == $besoinTri['id']) {
+                        $besoinRestant = (int)$besoin['quantite_restante'] - (int)$besoin['part_calculee'];
+                        if ($besoinRestant > 0) {
+                            $ajout = min(1, $reste, $besoinRestant);
+                            $besoin['part_calculee'] += $ajout;
+                            $reste -= $ajout;
+                            $details[] = "  +$ajout à {$besoin['ville_nom']} (déc: " . 
+                                        number_format($besoin['part_decimale'], 4) . ") → total: {$besoin['part_calculee']}";
+                        }
+                        break;
+                    }
                 }
+                unset($besoin);
             }
         }
+        
+        $details[] = "";
+        $details[] = "Reste final: $reste (doit être 0)";
         
         // Construire les attributions finales
         foreach ($besoins as $besoin) {
@@ -547,6 +616,10 @@ class SimulationController
      */
     private function enregistrerAttributions($db, array $dons, array $attributions, string $mode): void
     {
+        if (empty($dons) || empty($attributions)) {
+            return;
+        }
+        
         $donIndex = 0;
         $donRestant = $dons[0]['quantite'] ?? 0;
         
@@ -554,6 +627,16 @@ class SimulationController
             $quantiteAAttribuer = $attr['quantite_attribuee'];
             
             while ($quantiteAAttribuer > 0 && $donIndex < count($dons)) {
+                // Si le don actuel est épuisé, passer au suivant
+                if ($donRestant <= 0) {
+                    $donIndex++;
+                    if ($donIndex >= count($dons)) {
+                        break; // Plus de dons disponibles
+                    }
+                    $donRestant = $dons[$donIndex]['quantite'] ?? 0;
+                    continue;
+                }
+                
                 $quantiteUtilisee = min($quantiteAAttribuer, $donRestant);
                 
                 if ($quantiteUtilisee > 0) {
@@ -575,12 +658,6 @@ class SimulationController
                     
                     $donRestant -= $quantiteUtilisee;
                     $quantiteAAttribuer -= $quantiteUtilisee;
-                }
-                
-                // Passer au don suivant si épuisé
-                if ($donRestant <= 0 && $donIndex < count($dons) - 1) {
-                    $donIndex++;
-                    $donRestant = $dons[$donIndex]['quantite'] ?? 0;
                 }
             }
         }
@@ -648,86 +725,76 @@ class SimulationController
      * Exécuter l'algorithme de simulation d'attribution des dons aux besoins
      * POST /simulation/run
      * 
-     * ALGORITHME :
-     * 1. Récupérer dons ORDER BY date_saisie ASC
-     * 2. Récupérer besoins ORDER BY date_saisie ASC  
-     * 3. Pour chaque don :
-     *    - Chercher besoins même produit
-     *    - Calculer besoin restant
-     *    - attribuer = min(don_restant, besoin_restant)
-     *    - Enregistrer attribution
-     *    - Continuer jusqu'à don épuisé
+     * V3: Utilise le mode envoyé par le formulaire
      */
     public function run(): void
     {
-        // Réinitialiser les attributions existantes
-        $this->attributionModel->deleteAll();
-
+        $mode = Flight::request()->data->mode ?? 'chronologique';
+        
+        // Valider le mode
+        if (!in_array($mode, ['chronologique', 'croissant', 'proportionnel'])) {
+            $mode = 'chronologique';
+        }
+        
         $db = Flight::db();
         
-        // 1. Récupérer tous les dons triés par date
-        $dons = $this->donModel->getDonsOrderByDate();
-        
-        // 2. Récupérer tous les besoins triés par date (created_at si date_saisie n'existe pas)
-        $stmt = $db->query("SELECT * FROM besoin ORDER BY created_at ASC, id ASC");
-        $besoins = $stmt->fetchAll(\PDO::FETCH_ASSOC);
-        
-        // Tableau pour suivre les quantités restantes
-        $donRestants = [];
-        foreach ($dons as $don) {
-            $donRestants[$don['id']] = $don['quantite'];
-        }
-        
-        $besoinRestants = [];
-        foreach ($besoins as $besoin) {
-            $besoinRestants[$besoin['id']] = $besoin['quantite'];
-        }
-        
-        $attributionsCreees = 0;
-        
-        // 3. Pour chaque don
-        foreach ($dons as $don) {
-            $donId = $don['id'];
-            $produitDon = strtolower(trim($don['type_produit']));
+        try {
+            $db->runQuery("START TRANSACTION");
             
-            // Tant qu'il reste du don à attribuer
-            while ($donRestants[$donId] > 0) {
-                $meilleurBesoin = null;
+            // Supprimer les attributions existantes
+            $db->runQuery("DELETE FROM attribution");
+            
+            // Récupérer tous les produits avec dons disponibles
+            $produits = $db->fetchAll("SELECT DISTINCT type_produit FROM don WHERE quantite > 0");
+            
+            $totalAttributions = 0;
+            
+            foreach ($produits as $p) {
+                $produit = $p['type_produit'];
                 
-                // Chercher le premier besoin correspondant (même produit, avec quantité restante)
-                foreach ($besoins as $besoin) {
-                    $produitBesoin = strtolower(trim($besoin['produit']));
+                // Récupérer les dons pour ce produit
+                $dons = $db->fetchAll("
+                    SELECT * FROM don 
+                    WHERE type_produit = ? AND quantite > 0
+                    ORDER BY date_saisie ASC
+                ", [$produit]);
+                
+                // Récupérer les besoins pour ce produit
+                $besoins = $db->fetchAll("
+                    SELECT b.*, v.nom as ville_nom,
+                           (b.quantite - b.quantite_satisfaite) as quantite_restante
+                    FROM besoin b
+                    JOIN ville v ON b.ville_id = v.id
+                    WHERE b.produit = ? AND b.quantite > b.quantite_satisfaite
+                    ORDER BY b.date_saisie ASC
+                ", [$produit]);
+                
+                if (!empty($dons) && !empty($besoins)) {
+                    // Calculer la simulation selon le mode
+                    $resultat = $this->calculerSimulation($dons, $besoins, $mode);
                     
-                    // Correspondance par produit
-                    if ($produitBesoin === $produitDon && $besoinRestants[$besoin['id']] > 0) {
-                        $meilleurBesoin = $besoin;
-                        break;
-                    }
-                }
-                
-                // Si aucun besoin trouvé, passer au don suivant
-                if (!$meilleurBesoin) {
-                    break;
-                }
-                
-                // Calculer la quantité à attribuer
-                $besoinId = $meilleurBesoin['id'];
-                $quantiteAttribuee = min($donRestants[$donId], $besoinRestants[$besoinId]);
-                
-                // Créer l'attribution
-                if ($quantiteAttribuee > 0) {
-                    $this->attributionModel->createAttribution($donId, $besoinId, $quantiteAttribuee);
+                    // Enregistrer les attributions
+                    $this->enregistrerAttributions($db, $dons, $resultat['attributions'], $mode);
                     
-                    // Mettre à jour les quantités restantes
-                    $donRestants[$donId] -= $quantiteAttribuee;
-                    $besoinRestants[$besoinId] -= $quantiteAttribuee;
-                    
-                    $attributionsCreees++;
+                    $totalAttributions += count($resultat['attributions']);
                 }
             }
+            
+            $db->runQuery("COMMIT");
+            
+            $modeLabels = [
+                'chronologique' => 'Chronologique (FIFO)',
+                'croissant' => 'Croissant (petits d\'abord)',
+                'proportionnel' => 'Proportionnel (équitable)'
+            ];
+            
+            $_SESSION['success'] = "Simulation terminée avec succès en mode {$modeLabels[$mode]}. {$totalAttributions} attribution(s) créée(s).";
+            
+        } catch (\Exception $e) {
+            $db->runQuery("ROLLBACK");
+            $_SESSION['error'] = "Erreur lors de la simulation: " . $e->getMessage();
         }
         
-        $_SESSION['success'] = "Simulation terminée avec succès. {$attributionsCreees} attribution(s) créée(s).";
         $this->app->redirect('/simulation');
     }
 

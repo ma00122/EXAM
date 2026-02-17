@@ -156,7 +156,7 @@ $router->post('/simulation/run', function() use ($app) {
 
 $router->post('/simulation/reset', function() use ($app) {
     $controller = new SimulationController($app);
-    $controller->reset();
+    $controller->resetGlobal();
 });
 
 $router->get('/simulation/results', function() use ($app) {
