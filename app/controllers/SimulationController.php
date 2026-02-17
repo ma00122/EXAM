@@ -88,7 +88,7 @@ class SimulationController
             ORDER BY date_saisie ASC
         ");
         
-        // Frais configuré
+        // Frais configuré DDD
         $fraisPourcentage = $this->getFraisPourcentage();
         
         // Mode sélectionné (depuis URL ou défaut)
