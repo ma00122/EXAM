@@ -91,7 +91,7 @@ class SimulationController
         // Frais configuré DDD
         $fraisPourcentage = $this->getFraisPourcentage();
         
-        // Mode sélectionné (depuis URL ou défaut)
+        // Mode sélectionné (depuis URL ou défaut) SSS
         $selectedMode = $_GET['mode'] ?? 'chronologique';
 
         $this->app->render('simulation/index', [
